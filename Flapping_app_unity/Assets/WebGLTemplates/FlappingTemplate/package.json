@@ -1,0 +1,18 @@
+{
+  "name": "flapping-app",
+  "version": "1.0.0",
+  "description": "Use the @azure/storage-blob SDK version 12 to interact with Azure Blob storage",
+  "main": "server.js",
+  "scripts": {
+    "test": "node server.js",
+    "start": "node server.js"
+  },
+  "author": "Shotaro",
+  "license": "MIT",
+  "dependencies": {
+    "@azure/storage-blob": "^12.0.0",
+    "@types/dotenv": "^4.0.3",
+    "dotenv": "^6.0.0",
+    "socket.io": "^2.4.1"
+  }
+}

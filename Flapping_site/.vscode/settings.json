@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/a7f3fdf6-fd2f-4023-ace8-7707c49b4b92/resourceGroups/meganecolors/providers/Microsoft.Web/sites/glasses",
+    "appService.deploySubpath": "."
+}
