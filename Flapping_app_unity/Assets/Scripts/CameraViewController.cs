@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// カメラ表示領域を調整する
+/// </summary>
 [RequireComponent(typeof(Camera))]
 public class CameraViewController : MonoBehaviour
 {
-    Camera cam;
-    [SerializeField]RectTransform canvasRect;
+    private Camera cam;
+    [SerializeField] private RectTransform canvasRect;
     void Start()
     {
         cam = GetComponent<Camera>();

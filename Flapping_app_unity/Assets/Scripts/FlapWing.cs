@@ -7,6 +7,9 @@ public class FlapWing : MonoBehaviour, IIDCountable
     [SerializeField] float speed = 2f;
     [SerializeField] Material flapMat;
     public Texture2D flapTexture;
+    /// <summary>
+    /// FlapのIDを取得または設定します。
+    /// </summary>
     public int id { get; set; }
     float t = 0;
     public float y;
@@ -28,15 +31,15 @@ public class FlapWing : MonoBehaviour, IIDCountable
         transform.position += diff * Time.deltaTime * speed;
         t += Time.deltaTime;
         transform.position = new Vector3(transform.position.x, y - Mathf.Sin(t * 180 * Mathf.Deg2Rad), transform.position.z);
-        var v = transform.position;
-        if (Mathf.Abs(v.x) > 10 && v.x * diff.x > 0)
+        var tpos = transform.position;
+        if (Mathf.Abs(tpos.x) > 10 && tpos.x * diff.x > 0)
         {
-            transform.position = new Vector3(Mathf.Sign(v.x) * 20 - v.x, v.y, v.z);
+            transform.position = new Vector3(Mathf.Sign(tpos.x) * 20 - tpos.x, tpos.y, tpos.z);
             diff = new Vector3(-diff.x, 0, diff.z);
         }
-        else if (Mathf.Abs(v.z) > 10 && v.z * diff.z > 0)
+        else if (Mathf.Abs(tpos.z) > 10 && tpos.z * diff.z > 0)
         {
-            transform.position = new Vector3(v.x, v.y, Mathf.Sign(v.z) * 20 - v.z);
+            transform.position = new Vector3(tpos.x, tpos.y, Mathf.Sign(tpos.z) * 20 - tpos.z);
             diff = new Vector3(diff.x, 0, -diff.z);
         }
         r = diff;
