@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using UnitySocketIO;
 using UnitySocketIO.Events;
+using Newtonsoft.Json;
 using System.Linq;
 
 /// <summary>
@@ -17,7 +18,7 @@ interface IIDCountable
 /// <summary>
 /// IDとFlap画像データ、名前のセット
 /// </summary>
-[Serializable] public struct DataNameIDSet : IIDCountable
+[Serializable] public class DataNameIDSet : IIDCountable
 {
     public int id { get; set; }
     public string data;
@@ -27,7 +28,7 @@ interface IIDCountable
 /// <summary>
 /// IDと位置及び方向のセット
 /// </summary>
-[Serializable] public struct IDPositionSet : IIDCountable
+[Serializable] public class IDPositionSet : IIDCountable
 {
     public int id { get; set; }
     public Vector3 pos;
@@ -92,7 +93,11 @@ public class ButterflyController : MonoBehaviour
     private void AddID<T, S>(SocketIOEvent e, List<T> findingList, List<S> addingList) where T: IIDCountable where S: IIDCountable
     {
         var f = e.EscapeAndFromJson<S>();
-        if (findingList.Where(fl => fl.id == f.id).Count() == 0) addingList.Add(f);
+        Debug.Log(e.data);
+        if (findingList.Where(fl => fl.id == f.id).Count() == 0)
+        {
+            addingList.Add(f);
+        }
     }
 
     private void Start()
@@ -135,8 +140,10 @@ public class ButterflyController : MonoBehaviour
 
     private void Update()
     {
-        while (flaps.Count > 0) //受信したFlapデータが存在したら
+        Debug.Log(flaps.Count);
+        if (flaps.Count > 0) //受信したFlapデータが存在したら
         {
+            Debug.Log("create");
             DataNameIDSet dat = flaps[0]; //新規Flapデータ
             var textureData = dat.data; //画像データ
             byte[] byte_After = Convert.FromBase64String(textureData);
@@ -190,5 +197,5 @@ public static class SocketIOEventEx
     /// <typeparam name="T">変換したいObjectタイプ</typeparam>
     /// <param name="e">Socket.ioイベント</param>
     /// <returns>変換されたObject</returns>
-    public static T EscapeAndFromJson<T>(this SocketIOEvent e) => JsonUtility.FromJson<T>(EscapeTrim(e));
+    public static T EscapeAndFromJson<T>(this SocketIOEvent e) => JsonConvert.DeserializeObject<T>(EscapeTrim(e));
 }
