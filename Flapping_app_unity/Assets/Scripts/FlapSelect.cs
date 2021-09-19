@@ -4,6 +4,9 @@ using UnityEngine.UI;
 using System.Runtime.InteropServices;
 using System;
 
+/// <summary>
+/// Flap保存場所選択
+/// </summary>
 public class FlapSelect : MonoBehaviour
 {
 	[DllImport("__Internal")]
