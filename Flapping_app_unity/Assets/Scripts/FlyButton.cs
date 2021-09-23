@@ -14,18 +14,41 @@ public class DataNameSet
 
 public class FlyButton : MonoBehaviour
 {
+    /// <summary>
+    /// Flapのマテリアル
+    /// </summary>
     [SerializeField] Material flies;
+
+    /// <summary>
+    /// デフォルトのテクスチャ
+    /// </summary>
     [SerializeField] Texture2D defaultTexture;
+
+    /// <summary>
+    /// Socket.IOコントローラー
+    /// </summary>
     [SerializeField] SocketIOController io;
+
+    /// <summary>
+    /// 名前入力フィールド
+    /// </summary>
     [SerializeField] WebGLNativeInputField field;
+
+    /// <summary>
+    /// 戻るボタン
+    /// </summary>
     [SerializeField] Button back;
 
-    [DllImport("__Internal")]
-    private static extern void SetLocalStorage(string key, string value);
+    /// <summary>
+    /// ローカルストレージに値を設定する
+    /// </summary>
+    /// <param name="key">キー</param>
+    /// <param name="value">値</param>
+    [DllImport("__Internal")] private static extern void SetLocalStorage(string key, string value);
 
     void Start()
     {
-        //Debug.Log("{\"data\": \"2\", \"name\": \"asdfg\"}");
+        // Socket.IO接続
         io.On("connect", (SocketIOEvent e) => {
             Debug.Log("SocketIO connected");
         });
@@ -35,6 +58,7 @@ public class FlyButton : MonoBehaviour
         io.On("emit_from_server", (SocketIOEvent e) => {
             Debug.Log("WebSocket received message: " + e.data);
         });
+
 		switch (Settings.mode)
 		{
 			case DrawMode.New:
@@ -54,12 +78,9 @@ public class FlyButton : MonoBehaviour
         io.Close();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
+    /// <summary>
+    /// サーバーにデータを送る
+    /// </summary>
     public void SendData()
     {
         byte[] PNGData = Settings.DrawingFlap.EncodeToPNG();
@@ -72,5 +93,10 @@ public class FlyButton : MonoBehaviour
 		io.Emit("emit_from_client", dataStr);
         SetLocalStorage(Settings.SaveSlot.ToString(), dataStr);
     }
+
+    /// <summary>
+    /// Flapの名前設定
+    /// </summary>
+    /// <param name="s">Flap名前</param>
     public void SetName(string s) => Settings.FlapName = s;
 }

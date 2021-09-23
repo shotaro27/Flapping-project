@@ -13,7 +13,6 @@ public class CameraViewController : MonoBehaviour
         cam = GetComponent<Camera>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         var w = canvasRect.rect.width;

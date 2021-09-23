@@ -9,11 +9,26 @@ using System;
 /// </summary>
 public class FlapSelect : MonoBehaviour
 {
-	[DllImport("__Internal")]
-	private static extern string GetLocalStorage(string key);
+    /// <summary>
+    /// ローカルストレージから値を取得する
+    /// </summary>
+    /// <param name="key">値のキー</param>
+    /// <returns>取得した値</returns>
+	[DllImport("__Internal")] private static extern string GetLocalStorage(string key);
 
+    /// <summary>
+    /// テクスチャのサイズイメージ
+    /// </summary>
 	[SerializeField] Texture2D textureReference;
+
+    /// <summary>
+    /// 保存されたFlapを表示するTransform
+    /// </summary>
     [SerializeField] List<Transform> flaps;
+
+    /// <summary>
+    /// シーン操作
+    /// </summary>
     [SerializeField] SceneManagement sm;
 
     void Start()
@@ -43,6 +58,11 @@ public class FlapSelect : MonoBehaviour
     {
         
     }
+
+    /// <summary>
+    /// 新しいFlapを作る
+    /// </summary>
+    /// <param name="slot">保存場所</param>
     public void SetNew(int slot)
     {
         Settings.SaveSlot = slot;
@@ -52,6 +72,10 @@ public class FlapSelect : MonoBehaviour
         sm.GoScene("DrawSettingScene");
     }
 
+    /// <summary>
+    /// Flapを開く
+    /// </summary>
+    /// <param name="slot">保存場所</param>
     public void SetOpen(int slot)
     {
         Settings.SaveSlot = slot;

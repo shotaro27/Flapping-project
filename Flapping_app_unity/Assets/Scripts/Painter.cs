@@ -5,6 +5,9 @@ using UnityEngine.UI;
 using System.Linq;
 using UnityEngine.EventSystems;
 
+/// <summary>
+/// 描画ツールの種類
+/// </summary>
 public enum DrawingTools
 {
     Pen,
@@ -14,42 +17,108 @@ public enum DrawingTools
     Eraser
 }
 
+/// <summary>
+/// 描画ツール
+/// </summary>
 public class Painter : MonoBehaviour
 {
+    /// <summary>
+    /// 右側描画領域
+    /// </summary>
     [SerializeField] RawImage RightImage = null;
-    [SerializeField] RawImage LeftImage = null;
-    [SerializeField] Image RightImage0 = null;
-    [SerializeField] Image LeftImage0 = null;
 
+    /// <summary>
+    /// 左側描画領域
+    /// </summary>
+    [SerializeField] RawImage LeftImage = null;
+
+    /// <summary>
+    /// 右側枠
+    /// </summary>
+    [SerializeField] Image RightImageFrame = null;
+
+    /// <summary>
+    /// 左側枠
+    /// </summary>
+    [SerializeField] Image LeftImageFrame = null;
+
+    /// <summary>
+    /// 太さ
+    /// </summary>
     public int Weight;
 
+    /// <summary>
+    /// キャンバスのRectTransform
+    /// </summary>
     [SerializeField]
     RectTransform canvasRect;
 
+    /// <summary>
+    /// パレット
+    /// </summary>
     [SerializeField]
     ColorPalette palette;
 
+    /// <summary>
+    /// 描画ツール選択
+    /// </summary>
     [SerializeField]
     ToggleGroup tools;
 
+    /// <summary>
+    /// ベース色（素材）
+    /// </summary>
     public Color baseColor;
 
+    /// <summary>
+    /// 直線描画円
+    /// </summary>
     [SerializeField]
     GameObject lineCircle;
 
     [SerializeField]
     private Canvas canvas;
 
+    /// <summary>
+    /// 選択中のスタンプ
+    /// </summary>
     public Texture2D selectedStamp;
 
+    /// <summary>
+    /// 前のマウス位置
+    /// </summary>
     private Vector2Int prevMousePos;
-    private Texture2D texture = null;
-    private Texture2D texture_image = null;
-    private Texture2D texture_base = null;
 
+    /// <summary>
+    /// 編集するテクスチャ
+    /// </summary>
+    private Texture2D texture = null;
+
+    /// <summary>
+    /// ベースにするテクスチャ
+    /// </summary>
+    private Texture2D textureBase = null;
+
+    /// <summary>
+    /// 保存されているテクスチャ
+    /// </summary>
+    private Texture2D savedTexture = null;
+
+    /// <summary>
+    /// 描画中か
+    /// </summary>
     private bool isDrawing = false;
+
+    /// <summary>
+    /// 右画像のRectTransform
+    /// </summary>
     private RectTransform rectTransform;
+
+    /// <summary>
+    /// 右画像のRect
+    /// </summary>
     private Rect rect;
+
     private Color[] beforePixels;
     private Vector2Int LinePos1, LinePos2;
 
@@ -65,34 +134,34 @@ public class Painter : MonoBehaviour
 
     private void Start()
     {
-        texture_base = Settings.DrawingFlap ?? Settings.BaseShape;
-        texture_image = Settings.BaseShape;
+        savedTexture = Settings.DrawingFlap ?? Settings.BaseShape;
+        textureBase = Settings.BaseShape;
         baseColor = Settings.BaseColor;
         rectTransform = RightImage.gameObject.GetComponent<RectTransform>();
         rect = rectTransform.rect;
-        texture = new Texture2D(texture_image.width, texture_image.height, TextureFormat.RGBA32, false);
-        texture.SetPixels(texture_base.GetPixels());
+        texture = new Texture2D(textureBase.width, textureBase.height, TextureFormat.RGBA32, false);
+        texture.SetPixels(savedTexture.GetPixels());
         RightImage.texture = texture;
         LeftImage.texture = texture;
 		if (Settings.BaseColor.a == 0)
         {
             var sp0 = (Sprite)Resources.Load(Settings.ShapeName + "0", typeof(Sprite));
-            RightImage0.sprite = sp0;
-            LeftImage0.sprite = sp0;
+            RightImageFrame.sprite = sp0;
+            LeftImageFrame.sprite = sp0;
         }
         else
 		{
-            RightImage0.gameObject.SetActive(false);
-            LeftImage0.gameObject.SetActive(false);
+            RightImageFrame.gameObject.SetActive(false);
+            LeftImageFrame.gameObject.SetActive(false);
         }
         OnChangeTool(true);
 		if (Settings.DrawingFlap == null)
 		{
-			for (int y = 0; y < texture_image.height; y++)
+			for (int y = 0; y < textureBase.height; y++)
 			{
-				for (int x = 0; x < texture_image.width; x++)
+				for (int x = 0; x < textureBase.width; x++)
 				{
-					if (texture_image.GetPixel(x, y).a != 0)
+					if (textureBase.GetPixel(x, y).a != 0)
 					{
 						texture.SetPixel(x, y, baseColor);
 					}
@@ -160,14 +229,12 @@ public class Painter : MonoBehaviour
 						lRect.anchoredPosition = mPos;
                         visualLine.color = new Color(palette.selectedColor.r, palette.selectedColor.g,
                             palette.selectedColor.b, palette.Alpha);
-                        visualLine.weight = Weight * (int)rect.width / texture_image.width;
+                        visualLine.weight = Weight * (int)rect.width / textureBase.width;
                         visualLine.position1 = Vector2.zero;
-                        LinePos1.x = v.x;
-                        LinePos1.y = v.y;
+                        LinePos1 = v;
                     }
                     visualLine.position2 = mPos - lRect.anchoredPosition;
-                    LinePos2.x = v.x;
-                    LinePos2.y = v.y;
+                    LinePos2 = v;
                     break;
                 case DrawingTools.Stamp:
                     if (!isDrawing)
@@ -187,14 +254,14 @@ public class Painter : MonoBehaviour
                         for (int h = 0; h < sh; h++)
                         {
                             var y = v.y + h - sh / 2;
-                            if (y <= 0 || y >= texture_image.height)
+                            if (y <= 0 || y >= textureBase.height)
                             {
                                 continue;
                             }
                             for (int w = 0; w < sw; w++)
                             {
                                 var x = v.x + w - sw / 2;
-                                if (x > 0 && x < texture_image.width && texture_image.GetPixel(x, y).a != 0 && stampData[h * sw + w].a >= 0.5)
+                                if (x > 0 && x < textureBase.width && textureBase.GetPixel(x, y).a != 0 && stampData[h * sw + w].a >= 0.5)
                                 {
                                     texture.SetPixel(x, y, palette.AColor(texture.GetPixel(x, y)));
                                 }
@@ -203,7 +270,7 @@ public class Painter : MonoBehaviour
                     }
                     break;
                 case DrawingTools.Bucket:
-                    beforePixels = texture_image.GetPixels();
+                    beforePixels = textureBase.GetPixels();
                     if (!isDrawing)
                     {
                         paint(v.x, v.y, texture.GetPixel(v.x, v.y), palette.selectedColor);
@@ -235,8 +302,8 @@ public class Painter : MonoBehaviour
 			}
             texture.Apply();
             prevMousePos = v;
-            if (v.x > 0 && v.x < texture_image.width &&
-                v.y > 0 && v.y < texture_image.height) isDrawing = true;
+            if (v.x > 0 && v.x < textureBase.width &&
+                v.y > 0 && v.y < textureBase.height) isDrawing = true;
         }
         else
         {
@@ -262,74 +329,77 @@ public class Painter : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// 垂直なベクトルを計算する
+    /// </summary>
+    /// <param name="vec">基準のベクトル</param>
+    /// <returns></returns>
     private Vector2 CalcurateVerticalVector(Vector2 vec)
     {
         var verticalVector = new Vector2(vec.y, -vec.x);
         return verticalVector.normalized;
     }
 
-    void DrawPen(Vector2Int v, Color c, bool enableOpacity)
+    /// <summary>
+    /// テクスチャ上で有効な位置であるか
+    /// </summary>
+    /// <param name="pos">指定した位置</param>
+    /// <returns></returns>
+    bool IsValidPosition(Vector2Int pos)
+        => (pos.y < 0 || pos.y >= textureBase.height)
+        && (pos.x < 0 || pos.x >= textureBase.width);
+
+    /// <summary>
+    /// テクスチャに色をセットする
+    /// </summary>
+    /// <param name="texturePixels">テクスチャの色データ</param>
+    /// <param name="pos">セットする位置</param>
+    /// <param name="setColor">セットする色</param>
+    /// <param name="isEnabledOpacity">透過するか</param>
+    /// <returns>セットされたテクスチャの色データ</returns>
+    Color[] SetColorWithTexture(Color[] texturePixels, Vector2Int pos, Color setColor, bool isEnabledOpacity)
+	{
+        var pixels = texturePixels;
+        var posIndex = pos.y * textureBase.width + pos.x;
+        if (IsValidPosition(pos)) return null;
+        var col = textureList.Last()[posIndex];
+        if (col != setColor && textureBase.GetPixel(pos.x, pos.y).a != 0
+            && col == pixels[posIndex])
+            pixels[posIndex] = isEnabledOpacity ? palette.AColor(col) : setColor;
+        return pixels;
+    }
+
+    /// <summary>
+    /// ペン描画
+    /// </summary>
+    /// <param name="pointPos">点座標</param>
+    /// <param name="penColor">ペンの色</param>
+    /// <param name="isEnabledOpacity">透過するか</param>
+    void DrawPen(Vector2Int pointPos, Color penColor, bool isEnabledOpacity)
 	{
         int weight = Weight;
 
-        var dir = isDrawing ? prevMousePos - v : Vector2.right;
-        if (!isDrawing) prevMousePos = v;
+        var dir = isDrawing ? prevMousePos - pointPos : Vector2.right;
+        if (!isDrawing) prevMousePos = pointPos;
         var dist = (int)dir.magnitude;
         dir = dir.normalized;
         var pixs = texture.GetPixels();
         var circlePoints = GetCirclePoint(weight);
-
-		foreach (var cpoint in circlePoints)
+        foreach (var cpoint in circlePoints)
 		{
-			var y = v.y + cpoint.y;
-			if (y < 0 || y >= texture_image.height) continue;
-			var x = v.x + cpoint.x;
-			if (x < 0 || x >= texture_image.width) continue;
-			var col = textureList.Last()[y * texture_image.width + x];
-            if (col != c && texture_image.GetPixel(x, y).a != 0 && col == pixs[y * texture_image.width + x])
-                pixs[y * texture_image.width + x] = enableOpacity ? palette.AColor(col) : c;
+            var circlePos = pointPos + cpoint;
+            SetColorWithTexture(pixs, circlePos, penColor, isEnabledOpacity);
         }
+
         var verticalVector = CalcurateVerticalVector(dir);
 		for (float d = 0; d < dist; d += 1 / (Mathf.Abs(dir.x) + Mathf.Abs(dir.y)))
         {
 			for (float w = -weight / 2; w < weight / 2; w += 1 / (Mathf.Abs(dir.x) + Mathf.Abs(dir.y)))
 			{
-				var pos = v + dir * d + verticalVector * w;
-				var posint = new Vector2Int((int)pos.x, (int)pos.y);
-				var posindex = posint.y * texture_image.width + posint.x;
-				if (posint.y < 0 || posint.y >= texture_image.height) continue;
-				if (posint.x < 0 || posint.x >= texture_image.width) continue;
-				var col = textureList.Last()[posindex];
-                if (col != c && texture_image.GetPixel(posint.x, posint.y).a != 0 && col == pixs[posint.y * texture_image.width + posint.x])
-                    pixs[posint.y * texture_image.width + posint.x] = enableOpacity ? palette.AColor(col) : c;
+				var pos = Vector2Int.RoundToInt(pointPos + dir * d + verticalVector * w);
+                SetColorWithTexture(pixs, pos, penColor, isEnabledOpacity);
             }
-			//var pos = v + dir * d;
-			//foreach (var cpoint in circlePoints)
-			//{
-			//	var y = (int)pos.y + cpoint.y;
-			//	if (y <= 0 || y >= texture_image.height) continue;
-			//	var x = (int)pos.x + cpoint.x;
-			//	if (x <= 0 || x >= texture_image.width) continue;
-			//	var col = pixs[y * texture_image.width + x];
-			//	if (col != c && col.a != 0) pixs[y * texture_image.width + x] = c;
-			//}
-			//for (int h = -weight / 2; h < weight / 2; h++)
-			//{
-			//    var y = (int)pos.y + h;
-			//    if (y <= 0 || y >= texture_image.height)
-			//    {
-			//        continue;
-			//    }
-			//    for (int w = -weight / 2; w < weight / 2; w++)
-			//    {
-			//        var x = (int)pos.x + w;
-			//        if ((new Vector2Int(x, y) - pos).magnitude > weight / 2) continue;
-			//        if (x > 0 && x < texture_image.width && pixs[y * texture_image.width + x].a != 0)
-			//        {
-			//            pixs[y * texture_image.width + x] = c;
-			//        }
-			//    }
-			//}
 		}
 
         texture.SetPixels(pixs);
@@ -361,61 +431,61 @@ public class Painter : MonoBehaviour
 	}
 
     private Vector2Int InTexForm(Vector2Int v) => new Vector2Int(
-        v.x * texture_image.width / (int)rect.width,
-        v.y * texture_image.height / (int)rect.height
+        v.x * textureBase.width / (int)rect.width,
+        v.y * textureBase.height / (int)rect.height
     );
 
-    private List<Vector2Int> getFillList(int x, int y, Color targetcolor, Dictionary<Vector2Int, int> fill_list, List<int> already_list)
-    {
-        var newlist = new List<Vector2Int>();
+    //private List<Vector2Int> getFillList(int x, int y, Color targetcolor, Dictionary<Vector2Int, int> fill_list, List<int> already_list)
+    //{
+    //    var newlist = new List<Vector2Int>();
 
-        void AddNewList(int ax, int ay)
-        {
-            if (fill_list[new Vector2Int(ax, ay)] != 1)
-            {
-                fill_list[new Vector2Int(ax, ay)] = 1;
-                newlist.Add(new Vector2Int(ax, ay));
-            }
-        }
+    //    void AddNewList(int ax, int ay)
+    //    {
+    //        if (fill_list[new Vector2Int(ax, ay)] != 1)
+    //        {
+    //            fill_list[new Vector2Int(ax, ay)] = 1;
+    //            newlist.Add(new Vector2Int(ax, ay));
+    //        }
+    //    }
 
-        for (var i = x; i >= 1; i--) {
-            if (i == x) continue;
-            if (already_list[(i - 1) + ((y - 1) * texture_image.width)] == 1) break;
-            already_list[(i - 1) + ((y - 1) * texture_image.width)] = 1;
-            if (!(texture.GetPixel(x, y) == targetcolor)) break;
-            AddNewList(i, y);
-        }
+    //    for (var i = x; i >= 1; i--) {
+    //        if (i == x) continue;
+    //        if (already_list[(i - 1) + ((y - 1) * textureBase.width)] == 1) break;
+    //        already_list[(i - 1) + ((y - 1) * textureBase.width)] = 1;
+    //        if (!(texture.GetPixel(x, y) == targetcolor)) break;
+    //        AddNewList(i, y);
+    //    }
 
-        for (var i = x; i <= texture_image.width; i++) {
-            if (i == x) continue;
-            if (already_list[(i - 1) + ((y - 1) * texture_image.width)] == 1) break;
-            already_list[(i - 1) + ((y - 1) * texture_image.width)] = 1;
-            if (!(texture.GetPixel(x, y) == targetcolor)) break;
-            AddNewList(i, y);
-        }
+    //    for (var i = x; i <= textureBase.width; i++) {
+    //        if (i == x) continue;
+    //        if (already_list[(i - 1) + ((y - 1) * textureBase.width)] == 1) break;
+    //        already_list[(i - 1) + ((y - 1) * textureBase.width)] = 1;
+    //        if (!(texture.GetPixel(x, y) == targetcolor)) break;
+    //        AddNewList(i, y);
+    //    }
 
-        for (var i = y; i >= 1; i--) {
-            if (i == y) continue;
-            if (already_list[(x - 1) + ((i - 1) * texture_image.width)] == 1) break;
-            already_list[(x - 1) + ((i - 1) * texture_image.width)] = 1;
-            if (!(texture.GetPixel(x, y) == targetcolor)) break;
-            AddNewList(x, i);
-        }
+    //    for (var i = y; i >= 1; i--) {
+    //        if (i == y) continue;
+    //        if (already_list[(x - 1) + ((i - 1) * textureBase.width)] == 1) break;
+    //        already_list[(x - 1) + ((i - 1) * textureBase.width)] = 1;
+    //        if (!(texture.GetPixel(x, y) == targetcolor)) break;
+    //        AddNewList(x, i);
+    //    }
 
-        for (var i = y; i <= texture_image.height; i++) {
-            if (i == y) continue;
-            if (already_list[(x - 1) + ((i - 1) * texture_image.width)] == 1) break;
-            already_list[(x - 1) + ((i - 1) * texture_image.width)] = 1;
-            if (!(texture.GetPixel(x, y) == targetcolor)) break;
-            AddNewList(x, i);
-        }
+    //    for (var i = y; i <= textureBase.height; i++) {
+    //        if (i == y) continue;
+    //        if (already_list[(x - 1) + ((i - 1) * textureBase.width)] == 1) break;
+    //        already_list[(x - 1) + ((i - 1) * textureBase.width)] = 1;
+    //        if (!(texture.GetPixel(x, y) == targetcolor)) break;
+    //        AddNewList(x, i);
+    //    }
 
-        for (var i = 0; i < newlist.Count; i++) {
-            //newlist.AddRange(getFillList(newlist[i].x, newlist[i].y, targetcolor, fill_list, already_list));
-        }
+    //    for (var i = 0; i < newlist.Count; i++) {
+    //        //newlist.AddRange(getFillList(newlist[i].x, newlist[i].y, targetcolor, fill_list, already_list));
+    //    }
 
-        return newlist;
-    }
+    //    return newlist;
+    //}
 
     void paint(int x, int y, Color before, Color after)
     {

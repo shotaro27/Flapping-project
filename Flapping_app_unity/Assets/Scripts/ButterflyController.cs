@@ -12,13 +12,16 @@ using System.Linq;
 /// </summary>
 interface IIDCountable
 {
+    /// <summary>
+    /// FlapのIDを取得または設定します。
+    /// </summary>
 	int id { get; set; }
 }
 
 /// <summary>
 /// IDとFlap画像データ、名前のセット
 /// </summary>
-[Serializable] public class DataNameIDSet : IIDCountable
+public struct DataNameIDSet : IIDCountable
 {
     public int id { get; set; }
     public string data;
@@ -28,7 +31,7 @@ interface IIDCountable
 /// <summary>
 /// IDと位置及び方向のセット
 /// </summary>
-[Serializable] public class IDPositionSet : IIDCountable
+public struct IDPositionSet : IIDCountable
 {
     public int id { get; set; }
     public Vector3 pos;
@@ -141,7 +144,7 @@ public class ButterflyController : MonoBehaviour
     private void Update()
     {
         Debug.Log(flaps.Count);
-        if (flaps.Count > 0) //受信したFlapデータが存在したら
+        while (flaps.Count > 0)
         {
             Debug.Log("create");
             DataNameIDSet dat = flaps[0]; //新規Flapデータ
@@ -150,9 +153,9 @@ public class ButterflyController : MonoBehaviour
             Texture2D texture_After = new Texture2D(flyMaterial.mainTexture.width, flyMaterial.mainTexture.height,
                                             TextureFormat.RGBA32, false);
             texture_After.LoadImage(byte_After); //画像データをTexture2dに格納する
-            CreateFlap(texture_After, dat.id, dat.name); //Flap作成
-            flaps.RemoveAt(0); //受信データリストから削除
-            load.SetActive(false); //Loadingを外す
+            CreateFlap(texture_After, dat.id, dat.name);
+            flaps.RemoveAt(0);
+            load.SetActive(false);
         }
     }
 
@@ -166,14 +169,14 @@ public class ButterflyController : MonoBehaviour
     {
         var flap = Instantiate(Flap); //GameObject作成
         var fl = flap.GetComponent<FlapWing>(); //Flap羽コントローラー
-        fl.flapTexture = texture; //画像データ
+        fl.flapTexture = texture;
         fl.id = id;
-        fl.flapName = name; //名前
+        fl.flapName = name;
         var flpos = positions.Where(f => f.id == id).Select(f => f.pos).FirstOrDefault(); //位置
         flap.transform.position = flpos;
-        fl.y = flpos.y; //高度
-        fl.diff = diffs.Where(f => f.id == id).Select(f => f.pos).FirstOrDefault(); //方向
-        flapobjs.Add(flap); //GameObjectのリストに追加
+        fl.y = flpos.y;
+        fl.diff = diffs.Where(f => f.id == id).Select(f => f.pos).FirstOrDefault();
+        flapobjs.Add(flap);
     }
 }
 

@@ -56,6 +56,7 @@ public class CameraMove : MonoBehaviour
         //  nameText.gameObject.SetActive(false);
         //}
 	}
+
     /// <summary>
     /// 選択した方向のフラグを立てる
     /// </summary>
