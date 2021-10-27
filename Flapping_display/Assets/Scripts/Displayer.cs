@@ -109,10 +109,6 @@ public class Displayer : MonoBehaviour
 
     T EscapeAndFromJson<T>(SocketIOEvent e) => JsonUtility.FromJson<T>(EscapeTrim(e));
 
-    /// <summary>
-    /// 位置方向を送信する
-    /// </summary>
-    /// <param name="f">Flapのgameobject</param>
     void EmitPosDiff(GameObject f)
 	{
         var wing = f.GetComponent<FlapWing>();
@@ -155,12 +151,6 @@ public class Displayer : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// フラップ生成
-    /// </summary>
-    /// <param name="texture">フラップ画像データ</param>
-    /// <param name="id">フラップのID</param>
-    /// <param name="addFlag">新規フラップの数</param>
     void CreateFlap(Texture2D texture, int id, int addFlag)
 	{
         var flap = Instantiate(Flap);
