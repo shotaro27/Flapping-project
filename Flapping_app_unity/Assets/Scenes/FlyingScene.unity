@@ -1139,7 +1139,7 @@ MonoBehaviour:
   flyMaterial: {fileID: 2100000, guid: 7254b29b94ea2e64699de205a058a190, type: 2}
   normalTexture: {fileID: 2800000, guid: 0315ab99dfc2bff418a241fcab34dd8c, type: 3}
   io: {fileID: 1063973821}
-  Flap: {fileID: 8902105164216912437, guid: a02cfb65a77d3ac479097c520c6ca618, type: 3}
+  Flap: {fileID: 8902105164216912437, guid: 2d5bbd2914fd18042ad78dafac473282, type: 3}
   load: {fileID: 324882723}
 --- !u!4 &548151679
 Transform:

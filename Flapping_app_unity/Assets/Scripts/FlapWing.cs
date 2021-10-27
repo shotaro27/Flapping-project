@@ -83,11 +83,11 @@ public class FlapWing : MonoBehaviour, IIDCountable
 		transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(r), 0.01f);
     }
 
- //   void OnDestroy()
-	//{
- //       var particle = GetComponentInChildren<ParticleSystem>().gameObject;
- //       var newP = Instantiate(particle, transform.position, transform.rotation);
- //       Destroy(particle);
- //       Destroy(newP, particle.GetComponent<ParticleSystem>().main.startLifetime.constant);
-	//}
+	void OnDestroy()
+	{
+		var particle = GetComponentInChildren<ParticleSystem>().gameObject;
+		var newP = Instantiate(particle, transform.position, transform.rotation);
+		Destroy(particle);
+		Destroy(newP, particle.GetComponent<ParticleSystem>().main.startLifetime.constant);
+	}
 }
