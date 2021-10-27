@@ -28,6 +28,11 @@ public class PictureProvider : MonoBehaviour
     [SerializeField] SocketIOController io;
 
     /// <summary>
+    /// ページネーション
+    /// </summary>
+    [SerializeField] Pagenation pagenation;
+
+    /// <summary>
     /// テクスチャの大きさ基準
     /// </summary>
     [SerializeField] Texture2D textureReference;
@@ -47,6 +52,11 @@ public class PictureProvider : MonoBehaviour
     /// </summary>
     public static int page = 1;
 
+    /// <summary>
+    /// 最後のページ
+    /// </summary>
+    int lastPage = 1;
+
     void Start()
     {
         io.On("connect", e =>
@@ -63,11 +73,11 @@ public class PictureProvider : MonoBehaviour
             {
                 dataNameIDSets.Add(d);
             }
-            if (d.id >= page * 6 - 1 && load.activeSelf)
-            {
-                SetPage(page);
-            }
-        });
+			if (d.id >= page * 6 - 1 && load.activeSelf)
+			{
+				SetPage(page);
+			}
+		});
         io.On("sendFlapData", e =>
         {
             SetPage(page);
@@ -90,10 +100,10 @@ public class PictureProvider : MonoBehaviour
             if (!e || flag)
             {
                 flaps[i % 6].SetActive(false);
-                next.SetActive(false);
                 flag = true;
                 continue;
             }
+			if (!dataNameIDSets.Exists(f => f.id == i + 1)) next.SetActive(false);
             var d = dataNameIDSets.First(f => f.id == i);
             var dat = d.data;
             var bytes = Convert.FromBase64String(dat);
@@ -104,6 +114,7 @@ public class PictureProvider : MonoBehaviour
             flaps[d.id % 6].transform.GetChild(1).GetComponent<Image>().sprite = sp;
             flaps[d.id % 6].transform.GetChild(2).GetComponent<Image>().sprite = sp;
         }
+        pagenation.SetPagenation(page, lastPage);
         load.SetActive(false);
     }
 
@@ -116,8 +127,9 @@ public class PictureProvider : MonoBehaviour
     /// ページを設定する
     /// </summary>
     /// <param name="page">ページ</param>
-	void SetPage(int page)
+	internal void SetPage(int page)
     {
+        lastPage = (int)Mathf.Ceil(dataNameIDSets.Select(d => d.id).OrderByDescending(d => d).FirstOrDefault() / 6f);
         PictureProvider.page = page;
         SetFlapData(page);
     }
@@ -131,6 +143,16 @@ public class PictureProvider : MonoBehaviour
     /// 次のページへ
     /// </summary>
     public void Next() => SetPage(page + 1);
+
+    /// <summary>
+    /// 最初のページへ
+    /// </summary>
+    public void First() => SetPage(1);
+
+    /// <summary>
+    /// 最後のページへ
+    /// </summary>
+    public void Last() => SetPage(lastPage);
 
     /// <summary>
     /// 詳細を表示する

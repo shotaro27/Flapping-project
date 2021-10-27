@@ -103,6 +103,14 @@ public class ButterflyController : MonoBehaviour
         }
     }
 
+    public void RemoveAll()
+    {
+        var ob = flapobjs[0];
+        flapobjs.RemoveAt(0);
+        Destroy(ob);
+        positions.RemoveAt(0);
+        diffs.RemoveAt(0);
+    }
     private void Start()
     {
         io.On("connect", e =>

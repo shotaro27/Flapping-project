@@ -298,6 +298,10 @@ public class Painter : MonoBehaviour
 				if (!textureHistory[textureHistory.Count - 1].SequenceEqual(texture.GetPixels()))
                 {
                     Debug.Log("save");
+                    if (textureHistory.Count > 9)
+                    {
+                        textureHistory.RemoveAt(0);
+                    }
                     textureHistory.Add(texture.GetPixels());
                 }
                 isDrawing = false;
