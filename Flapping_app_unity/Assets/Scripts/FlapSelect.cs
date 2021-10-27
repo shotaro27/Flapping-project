@@ -31,14 +31,18 @@ public class FlapSelect : MonoBehaviour
     /// </summary>
     [SerializeField] SceneManagement sm;
 
+    List<bool> isNew;
+
     void Start()
     {
-		for (int slot = 0; slot < flaps.Count; slot++)
-		{
-			string s = GetLocalStorage(slot.ToString());
+        isNew = new List<bool>(flaps.Count);
+        for (int slot = 0; slot < flaps.Count; slot++)
+        {
+            string s = GetLocalStorage(slot.ToString());
             if (string.IsNullOrEmpty(s))
             {
                 flaps[slot].GetChild(2).gameObject.SetActive(false);
+                isNew[slot] = true;
             }
             else
             {
@@ -49,6 +53,7 @@ public class FlapSelect : MonoBehaviour
                 var sp = Sprite.Create(t, new Rect(0, 0, t.width, t.height), Vector2.zero);
                 flaps[slot].GetChild(0).GetChild(0).gameObject.GetComponent<Image>().sprite = sp;
                 flaps[slot].GetChild(0).GetChild(1).gameObject.GetComponent<Image>().sprite = sp;
+                isNew[slot] = false;
             }
         }
     }
@@ -56,7 +61,17 @@ public class FlapSelect : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
+    }
+    /// <summary>
+    /// 新しいFlap or Flapを開く
+    /// </summary>
+    /// <param name="slot">保存場所</param>
+    public void Set(int slot)
+    {
+        if (isNew[slot])
+            SetNew(slot);
+        else SetOpen(slot);
     }
 
     /// <summary>
