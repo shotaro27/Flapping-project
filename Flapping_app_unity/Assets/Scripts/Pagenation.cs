@@ -9,7 +9,7 @@ public class Pagenation : MonoBehaviour
     [SerializeField] PictureProvider pictureController;
     [SerializeField] GameObject p;
 
-    public void SetPagenation(int page, int lastPage)
+    public void SetPagenation(int page, int lastPage, GameObject prev, GameObject next)
 	{
         foreach (Transform n in transform) Destroy(n.gameObject);
         if (lastPage >= 5)
@@ -35,8 +35,31 @@ public class Pagenation : MonoBehaviour
                 }
             }
         }
-		
-	}
+		else
+		{
+            for (int i = 0; i < lastPage; i++)
+            {
+                var pi = Instantiate(p, transform);
+                var rt = pi.GetComponent<RectTransform>();
+                rt.anchoredPosition += Vector2.right * (rt.rect.width + 5) * (i - lastPage / 2f + 0.5f);
+                var pageNum = i + 1;
+                pi.GetComponentInChildren<Text>().text = pageNum.ToString();
+                if (pageNum == page)
+                {
+                    pi.GetComponentInChildren<Text>().color = Color.yellow;
+                }
+                else
+                {
+                    pi.GetComponent<Button>().onClick.AddListener(() =>
+                    {
+                        Debug.Log(pageNum); pictureController.SetPage(pageNum);
+                    });
+                }
+            }
+        }
+        prev.SetActive(page != 1);
+        next.SetActive(page != lastPage);
+    }
     void Start()
     {
         

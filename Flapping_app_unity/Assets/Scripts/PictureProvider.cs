@@ -73,11 +73,13 @@ public class PictureProvider : MonoBehaviour
             {
                 dataNameIDSets.Add(d);
             }
-			if (d.id >= page * 6 - 1 && load.activeSelf)
-			{
-				SetPage(page);
-			}
-		});
+            lastPage = (int)Mathf.Ceil(d.id / 6f);
+            if (d.id >= page * 6 - 1 && load.activeSelf)
+            {
+                SetPage(page);
+            }
+            pagenation.SetPagenation(page, lastPage, prev, next);
+        });
         io.On("sendFlapData", e =>
         {
             SetPage(page);
@@ -91,9 +93,6 @@ public class PictureProvider : MonoBehaviour
     void SetFlapData(int page)
     {
         var flag = false;
-        prev.SetActive(true);
-        next.SetActive(true);
-        if (page == 1) prev.SetActive(false);
         for (int i = page * 6 - 6; i < page * 6; i++)
         {
             var e = dataNameIDSets.Exists(f => f.id == i);
@@ -103,7 +102,6 @@ public class PictureProvider : MonoBehaviour
                 flag = true;
                 continue;
             }
-			if (!dataNameIDSets.Exists(f => f.id == i + 1)) next.SetActive(false);
             var d = dataNameIDSets.First(f => f.id == i);
             var dat = d.data;
             var bytes = Convert.FromBase64String(dat);
@@ -114,7 +112,7 @@ public class PictureProvider : MonoBehaviour
             flaps[d.id % 6].transform.GetChild(1).GetComponent<Image>().sprite = sp;
             flaps[d.id % 6].transform.GetChild(2).GetComponent<Image>().sprite = sp;
         }
-        pagenation.SetPagenation(page, lastPage);
+        pagenation.SetPagenation(page, lastPage, prev, next);
         load.SetActive(false);
     }
 
@@ -129,7 +127,6 @@ public class PictureProvider : MonoBehaviour
     /// <param name="page">ページ</param>
 	internal void SetPage(int page)
     {
-        lastPage = (int)Mathf.Ceil(dataNameIDSets.Select(d => d.id).OrderByDescending(d => d).FirstOrDefault() / 6f);
         PictureProvider.page = page;
         SetFlapData(page);
     }
