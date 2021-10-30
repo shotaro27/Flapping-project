@@ -30,7 +30,7 @@ public class Pagenation : MonoBehaviour
                 {
                     pi.GetComponent<Button>().onClick.AddListener(() =>
                     {
-                        Debug.Log(pageNum); pictureController.SetPage(pageNum);
+                        pictureController.SetPage(pageNum);
                     });
                 }
             }

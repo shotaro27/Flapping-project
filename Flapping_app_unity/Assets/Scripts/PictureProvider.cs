@@ -59,6 +59,7 @@ public class PictureProvider : MonoBehaviour
 
     void Start()
     {
+        lastPage = (int)Mathf.Ceil((dataNameIDSets.Count - 1) / 6f);
         io.On("connect", e =>
         {
             Debug.Log("SocketIO connected");
