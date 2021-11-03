@@ -23,13 +23,14 @@ public class CameraMove : MonoBehaviour
     /// </summary>
     public bool[] ds = { false, false, false, false, false, false };
 
-    [SerializeField] private Text nameText;
-    [SerializeField] private RectTransform canvasRect;
-    //Camera cam;
+    [SerializeField] private GameObject goPictureBook;
+    bool isMouseDown;
+	Camera cam;
 	private void Start()
     {
-        //cam = GetComponent<Camera>();
-    }
+        isMouseDown = false;
+        cam = GetComponent<Camera>();
+	}
 	void Update()
     {
         if (ds[0]) transform.rotation *= Quaternion.Euler(0, -rotateSpeed * Time.deltaTime, 0);
@@ -39,22 +40,30 @@ public class CameraMove : MonoBehaviour
         if (ds[4]) transform.position += transform.up * speed * Time.deltaTime;
         if (ds[5]) transform.position -= transform.up * speed * Time.deltaTime;
 
-        //以下スクリーンに選択したFlapの名前を表示するプログラム
-        //Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-		//if (Physics.Raycast(ray, out var hit, 10.0f) && hit.collider.gameObject.TryGetComponent(out FlapWing fl))
-		//{
-        //  nameText.gameObject.SetActive(true);
-        //  Vector2 ViewportPosition = cam.WorldToViewportPoint(fl.transform.position);
-        //  Vector2 WorldObject_ScreenPosition = new Vector2(
-        //  (ViewportPosition.x * canvasRect.sizeDelta.x) - (canvasRect.sizeDelta.x * 0.5f),
-        //  (ViewportPosition.y * canvasRect.sizeDelta.y) - (canvasRect.sizeDelta.y * 0.5f));
-        //  nameText.gameObject.GetComponent<RectTransform>().anchoredPosition = WorldObject_ScreenPosition;
-        //  nameText.text = fl.flapName;
-		//}
-		//else
-        //{
-        //  nameText.gameObject.SetActive(false);
-        //}
+		if (Input.GetMouseButton(0))
+		{
+			if (!isMouseDown)
+			{
+                Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out var hit, 10.0f) && hit.collider.gameObject.TryGetComponent(out FlapWing fl))
+                {
+                    goPictureBook.SetActive(true);
+                    goPictureBook.GetComponent<ButterflyTrack>().TargetButterfly = fl.gameObject;
+                }
+                else
+                {
+                    goPictureBook.SetActive(false);
+                }
+                isMouseDown = true;
+            }
+        }
+        else
+		{
+			if (isMouseDown)
+            {
+                isMouseDown = false;
+            }
+		}
 	}
 
     /// <summary>
