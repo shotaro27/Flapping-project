@@ -989,7 +989,7 @@ MonoBehaviour:
   mat: {fileID: 2100000, guid: 7254b29b94ea2e64699de205a058a190, type: 2}
   next: {fileID: 1698084126}
   prev: {fileID: 1953062566}
-  sky: {fileID: 2047836028}
+  sky: {fileID: 2047836026}
 --- !u!1 &1642693630
 GameObject:
   m_ObjectHideFlags: 0
@@ -1480,7 +1480,6 @@ GameObject:
   - component: {fileID: 2047836025}
   - component: {fileID: 2047836030}
   - component: {fileID: 2047836029}
-  - component: {fileID: 2047836028}
   - component: {fileID: 2047836027}
   - component: {fileID: 2047836026}
   m_Layer: 5
@@ -1518,11 +1517,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2047836024}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: da427f09df1b3b444bbd6db406f08d66, type: 3}
+  m_Script: {fileID: 11500000, guid: f68fd8e9fb14d8d4ea07dcbb0f0bbf96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  onMaterial: {fileID: 2100000, guid: d1fdb8e44b28da34d9e922cca0bc740e, type: 2}
-  offMaterial: {fileID: 2100000, guid: 9ca22510633fbfd4399f1704cd9d5c72, type: 2}
+  Skyboxes:
+  - SkyboxMaterial: {fileID: 2100000, guid: 9ca22510633fbfd4399f1704cd9d5c72, type: 2}
+    SkyboxImage: {fileID: 21300000, guid: 68a3dc3c90709c645b2bd11326c58cef, type: 3}
+  - SkyboxMaterial: {fileID: 2100000, guid: d1fdb8e44b28da34d9e922cca0bc740e, type: 2}
+    SkyboxImage: {fileID: 21300000, guid: c0dab0f9d027a0d438a6ecd0d125c49b, type: 3}
+  - SkyboxMaterial: {fileID: 2100000, guid: 9dfde1cbd38e88c45a7e4c4e51e0befa, type: 2}
+    SkyboxImage: {fileID: 21300000, guid: 49a94f66e397ebd448b220103f3d9111, type: 3}
+  DefaultSkyboxState: 0
 --- !u!114 &2047836027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1532,21 +1537,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2047836024}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e70de1b946bb2404481e622dbc3ca6a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  onSprite: {fileID: 21300000, guid: c0dab0f9d027a0d438a6ecd0d125c49b, type: 3}
-  offSprite: {fileID: 21300000, guid: 68a3dc3c90709c645b2bd11326c58cef, type: 3}
---- !u!114 &2047836028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2047836024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -1577,13 +1568,9 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 2047836029}
-  toggleTransition: 0
-  graphic: {fileID: 0}
-  m_Group: {fileID: 0}
-  onValueChanged:
+  m_OnClick:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
 --- !u!114 &2047836029
 MonoBehaviour:
   m_ObjectHideFlags: 0

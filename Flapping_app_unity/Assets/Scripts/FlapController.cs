@@ -17,7 +17,7 @@ public class FlapController : MonoBehaviour
     /// <summary>
     /// 昼夜
     /// </summary>
-    public static bool isNight;
+    public static int SkyboxState;
 
     /// <summary>
     /// Flapデータ
@@ -62,10 +62,10 @@ public class FlapController : MonoBehaviour
     /// <summary>
     /// 昼夜切り替え
     /// </summary>
-    [SerializeField] private Toggle sky;
+    [SerializeField] private SkyboxSetter sky;
     void Start()
     {
-        sky.isOn = isNight; //昼夜設定
+        sky.DefaultSkyboxState = SkyboxState; //昼夜設定
         d = PictureProvider.dataNameIDSets.First(f => f.id == id); //Flapデータ取得
         idText.text = d.id.ToString(); //ID表示
         nameText.text = d.name; //名前表示
@@ -119,7 +119,7 @@ public class FlapController : MonoBehaviour
     void ShowDetail(int id)
     {
         FlapController.id = id;
-        isNight = sky.isOn;
+        SkyboxState = sky.skyboxState;
         SceneManager.LoadScene("PictureDetailScene");
     }
 }
