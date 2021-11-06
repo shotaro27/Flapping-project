@@ -233,6 +233,11 @@ public static class Settings
     public static int SaveSlot;
 
     /// <summary>
+    /// ID
+    /// </summary>
+    public static int Id;
+
+    /// <summary>
     /// Flap名前
     /// </summary>
     public static string FlapName;

@@ -4,6 +4,7 @@ using UnitySocketIO;
 using UnitySocketIO.Events;
 using System.Runtime.InteropServices;
 using System;
+using Newtonsoft.Json;
 
 [Serializable]
 public class DataNameSet
@@ -46,11 +47,14 @@ public class FlyButton : MonoBehaviour
     /// <param name="value">値</param>
     [DllImport("__Internal")] private static extern void SetLocalStorage(string key, string value);
 
+    int lastFlapID;
+
     void Start()
     {
         // Socket.IO接続
         io.On("connect", (SocketIOEvent e) => {
             Debug.Log("SocketIO connected");
+            io.Emit("getLastFlapID");
         });
 
         io.Connect();
@@ -59,7 +63,11 @@ public class FlyButton : MonoBehaviour
             Debug.Log("WebSocket received message: " + e.data);
         });
 
-		switch (Settings.mode)
+        io.On("lastFlapID", (SocketIOEvent e) => {
+            lastFlapID = int.Parse(e.data);
+        });
+
+        switch (Settings.mode)
 		{
 			case DrawMode.New:
                 back.onClick.AddListener(() => GetComponent<SceneManagement>().GoScene("DrawScene"));
@@ -83,15 +91,22 @@ public class FlyButton : MonoBehaviour
     /// </summary>
     public void SendData()
     {
-        byte[] PNGData = Settings.DrawingFlap.EncodeToPNG();
-        string encodedText = Convert.ToBase64String(PNGData);
-        DataNameSet set = new DataNameSet();
-        set.data = encodedText;
-        set.name = Settings.FlapName;
-        string dataStr = JsonUtility.ToJson(set);
-        Debug.Log(dataStr);
-		io.Emit("emit_from_client", dataStr);
-        SetLocalStorage(Settings.SaveSlot.ToString(), dataStr);
+		if (Settings.mode == DrawMode.New)
+        {
+            byte[] PNGData = Settings.DrawingFlap.EncodeToPNG();
+            string encodedText = Convert.ToBase64String(PNGData);
+            DataNameSet set = new DataNameSet();
+            set.data = encodedText;
+            set.name = Settings.FlapName;
+            string dataStr = JsonUtility.ToJson(set);
+            Debug.Log(dataStr);
+            io.Emit("emit_from_client", dataStr);
+            SetLocalStorage(Settings.SaveSlot.ToString(), dataStr);
+        }
+		else
+		{
+            io.Emit("addFlapID", JsonConvert.SerializeObject(new Ids() {id = Settings.Id}));
+		}
     }
 
     /// <summary>

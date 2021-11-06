@@ -63,6 +63,8 @@ public class FlapController : MonoBehaviour
     /// 昼夜切り替え
     /// </summary>
     [SerializeField] private SkyboxSetter sky;
+
+    Texture2D flapTexture;
     void Start()
     {
         sky.DefaultSkyboxState = SkyboxState; //昼夜設定
@@ -74,10 +76,10 @@ public class FlapController : MonoBehaviour
         var textureData = d.data; //画像データ
         var flyMaterial = new Material(mat);
         byte[] byte_After = Convert.FromBase64String(textureData);
-        Texture2D texture_After = new Texture2D(flyMaterial.mainTexture.width, flyMaterial.mainTexture.height,
+        flapTexture = new Texture2D(flyMaterial.mainTexture.width, flyMaterial.mainTexture.height,
                                         TextureFormat.RGBA32, false);
-        texture_After.LoadImage(byte_After);
-        flyMaterial.mainTexture = texture_After;
+        flapTexture.LoadImage(byte_After);
+        flyMaterial.mainTexture = flapTexture;
         flap.GetComponentsInChildren<MeshRenderer>().ToList().ForEach(f => f.material = flyMaterial);
 
         //アニメーション
@@ -122,4 +124,11 @@ public class FlapController : MonoBehaviour
         SkyboxState = sky.skyboxState;
         SceneManager.LoadScene("PictureDetailScene");
     }
+
+    public void Fly()
+	{
+        Settings.Id = id;
+        Settings.DrawingFlap = flapTexture;
+        Settings.mode = DrawMode.Open;
+	}
 }
