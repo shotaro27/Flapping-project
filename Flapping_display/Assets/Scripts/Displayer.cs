@@ -1,54 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnitySocketIO;
 using UnitySocketIO.Events;
-using System.Linq;
+using SocketIOJsonObjects;
+using Newtonsoft.Json;
 
-[Serializable]
-public struct DataNameIDSet
-{
-    public string data;
-    public string name;
-    public int id;
-}
-
-[Serializable]
-public struct IDPositionSet
-{
-    public int id;
-    public Vector3 pos;
-}
-[Serializable] public struct Ids { public string id; }
-[Serializable] public struct Ints { public int id; }
-
-public static class JsonHelper
-{
-    public static T[] FromJson<T>(string json)
-    {
-        string dummy_json = $"{{\"{DummyNode<T>.ROOT_NAME}\": {json}}}";
-        var obj = JsonUtility.FromJson<DummyNode<T>>(dummy_json);
-        return obj.array;
-    }
-    public static string ToJson<T>(IEnumerable<T> collection)
-    {
-        string json = JsonUtility.ToJson(new DummyNode<T>(collection));
-        int start = DummyNode<T>.ROOT_NAME.Length + 4;
-        int len = json.Length - start - 1;
-        return json.Substring(start, len);
-    }
-    [Serializable]
-    private struct DummyNode<T>
-    {
-        public const string ROOT_NAME = nameof(array);
-        public T[] array;
-        public DummyNode(IEnumerable<T> collection) => array = collection.ToArray();
-    }
-}
-
+/// <summary>
+/// Flapを管理する
+/// </summary>
 [Serializable]
 public class Flap
 {
@@ -56,19 +18,50 @@ public class Flap
     public GameObject obj;
 }
 
+/// <summary>
+/// Flapを表示する
+/// </summary>
 public class Displayer : MonoBehaviour
 {
+    /// <summary>
+    /// Flapのデフォルトテクスチャ
+    /// </summary>
     [SerializeField]
     private Texture2D normalTexture;
+
+    /// <summary>
+    /// Flapのマテリアル
+    /// </summary>
     [SerializeField]
     private Material flyMaterial;
+
+    /// <summary>
+    /// 名前を表示するテキスト(確認用)
+    /// </summary>
     [SerializeField]
     private Text nameText;
+
+    /// <summary>
+    /// Socket.ioコントローラー
+    /// </summary>
     [SerializeField] SocketIOController io;
+
+    /// <summary>
+    /// Flapのプレハブ
+    /// </summary>
     [SerializeField]
-    private GameObject Flap;
-	List<Flap> flaps = new List<Flap>();
-    List<DataNameIDSet> addingFlapDatas = new List<DataNameIDSet>();
+    private GameObject FlapPrefab;
+	
+    /// <summary>
+    /// Flapのリスト
+    /// </summary>
+    readonly List<Flap> flaps = new List<Flap>();
+	
+    /// <summary>
+    /// 追加するFlapデータのリスト
+    /// </summary>
+    readonly List<FlapDataSet> addingFlapDatas = new List<FlapDataSet>();
+
     private void Start()
     {
         io.On("connect", (SocketIOEvent e) =>
@@ -78,18 +71,18 @@ public class Displayer : MonoBehaviour
         io.Connect();
         io.On("emit_to_garden", (SocketIOEvent e) =>
         {
-			var f = EscapeAndFromJson<DataNameIDSet>(e);
+			var f = e.EscapeAndFromJson<FlapDataSet>();
             addingFlapDatas.Add(f);
         });
         io.On("add_to_garden", (SocketIOEvent e) =>
         {
-            var f = EscapeAndFromJson<DataNameIDSet>(e);
+            var f = e.EscapeAndFromJson<FlapDataSet>();
             addingFlapDatas.Add(f);
-            var oldfl = flaps[0];
-            flaps.Remove(oldfl);
-			var i = new Ints { id = oldfl.id };
-			io.Emit("removeFlap", JsonUtility.ToJson(i));
-            Destroy(oldfl.obj);
+            var oldFlap = flaps[0];
+            flaps.Remove(oldFlap);
+			var i = new FlapId { id = oldFlap.id };
+			io.Emit("removeFlap", JsonConvert.SerializeObject(i));
+            Destroy(oldFlap.obj);
         });
         io.On("emit_from_server", (SocketIOEvent e) =>
         {
@@ -101,8 +94,8 @@ public class Displayer : MonoBehaviour
             var id = EscapeTrim(e);
             Debug.Log("access");
             flaps.ForEach(EmitPosDiff);
-			var i = new Ids { id = id };
-			io.Emit("sendFlapDatas", JsonUtility.ToJson(i));
+			var i = new SocketId { id = id };
+			io.Emit("sendFlapDatas", JsonConvert.SerializeObject(i));
         });
     }
     string EscapeTrim(SocketIOEvent e)
@@ -112,8 +105,6 @@ public class Displayer : MonoBehaviour
         return ed;
     }
 
-    T EscapeAndFromJson<T>(SocketIOEvent e) => JsonUtility.FromJson<T>(EscapeTrim(e));
-
     /// <summary>
     /// 位置方向を送信する
     /// </summary>
@@ -121,14 +112,14 @@ public class Displayer : MonoBehaviour
     void EmitPosDiff(Flap f)
 	{
         var wing = f.obj.GetComponent<FlapWing>();
-        var p = new IDPositionSet
+        var p = new FlapPositionSet
         {
             id = f.id,
             pos = f.obj.transform.position
         };
-        p.pos.y = wing.y;
+        p.pos.y = wing.altitude;
         io.Emit("setPos", JsonUtility.ToJson(p));
-        var d = new IDPositionSet
+        var d = new FlapPositionSet
         {
             id = f.id,
             pos = wing.diff
@@ -164,16 +155,15 @@ public class Displayer : MonoBehaviour
     /// </summary>
     /// <param name="texture">フラップ画像データ</param>
     /// <param name="id">フラップのID</param>
-    /// <param name="addFlag">新規フラップの数</param>
     void CreateFlap(Texture2D texture, int id)
 	{
-        var flapObj = Instantiate(Flap);
+        var flapObj = Instantiate(FlapPrefab);
         var f = flapObj.GetComponent<FlapWing>();
         f.flapTexture = texture;
         var diff = new Vector3(UnityEngine.Random.Range(-3f, 3f), 0, UnityEngine.Random.Range(-3f, 3f)).normalized;
         transform.position += Vector3.forward * UnityEngine.Random.Range(-3f, 3f);
         transform.position += Vector3.right * UnityEngine.Random.Range(-3f, 3f);
-        f.y = UnityEngine.Random.Range(-3f, 3f);
+        f.altitude = UnityEngine.Random.Range(-3f, 3f);
         f.diff = diff;
         var flap = new Flap()
         {
@@ -182,19 +172,41 @@ public class Displayer : MonoBehaviour
         };
         flaps.Add(flap);
         EmitPosDiff(flap);
-        io.Emit("addFlap", JsonUtility.ToJson(new Ints { id = id }));
+        io.Emit("addFlap", JsonConvert.SerializeObject(new FlapId { id = id }));
     }
 
     public void Send()
     {
 		foreach (var f in flaps)
 		{
-            var set = new IDPositionSet();
+            var set = new FlapPositionSet();
             set.id = f.id;
             set.pos = f.obj.transform.position;
-            var s = JsonUtility.ToJson(set);
+            var s = JsonConvert.SerializeObject(set);
             Debug.Log(s);
 			io.Emit("emit_from_client", s);
 		}
 	}
+}
+public static class SocketIOEventEx
+{
+    /// <summary>
+    /// エスケープを外し両端を切る(javascriptで送信するときに両側につくダブルクォーテーションを取る)
+    /// </summary>
+    /// <param name="e">Socket.ioイベント</param>
+    /// <returns>整理された文字列</returns>
+    public static string EscapeTrim(this SocketIOEvent e)
+    {
+        var ed = Regex.Unescape(e.data);
+        ed = ed.Substring(1, ed.Length - 2);
+        return ed;
+    }
+
+    /// <summary>
+    /// エスケープしてJSONをObjectに変換する
+    /// </summary>
+    /// <typeparam name="T">変換したいObjectタイプ</typeparam>
+    /// <param name="e">Socket.ioイベント</param>
+    /// <returns>変換されたObject</returns>
+    public static T EscapeAndFromJson<T>(this SocketIOEvent e) => JsonConvert.DeserializeObject<T>(EscapeTrim(e));
 }

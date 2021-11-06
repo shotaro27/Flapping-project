@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Flap飛行
+/// </summary>
 public class FlapWing : MonoBehaviour
 {
     public Vector3 diff;
@@ -10,7 +13,7 @@ public class FlapWing : MonoBehaviour
     [SerializeField] Material flapMat;
     public Texture2D flapTexture;
     float t = 0;
-    public float y;
+    public float altitude;
     void Start()
     {
         t = Random.Range(-3f, 3f);
@@ -27,7 +30,7 @@ public class FlapWing : MonoBehaviour
         //diff = (diff - transform.position * 0.1f).normalized;
         transform.position += diff * Time.deltaTime * speed;
         t += Time.deltaTime;
-        transform.position = new Vector3(transform.position.x, y - Mathf.Sin(t * 180 * Mathf.Deg2Rad), transform.position.z);
+        transform.position = new Vector3(transform.position.x, altitude - Mathf.Sin(t * 180 * Mathf.Deg2Rad), transform.position.z);
         var v = transform.position;
         if (Mathf.Abs(v.x) > 10 && v.x * diff.x > 0)
         {
