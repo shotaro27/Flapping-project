@@ -69,7 +69,6 @@ public class Displayer : MonoBehaviour
     private GameObject Flap;
 	List<Flap> flaps = new List<Flap>();
     List<DataNameIDSet> addingFlapDatas = new List<DataNameIDSet>();
-    int addFlag = 0;
     private void Start()
     {
         io.On("connect", (SocketIOEvent e) =>
@@ -91,7 +90,6 @@ public class Displayer : MonoBehaviour
 			var i = new Ints { id = oldfl.id };
 			io.Emit("removeFlap", JsonUtility.ToJson(i));
             Destroy(oldfl.obj);
-            addFlag++;
         });
         io.On("emit_from_server", (SocketIOEvent e) =>
         {
@@ -155,10 +153,9 @@ public class Displayer : MonoBehaviour
             Texture2D texture_After = new Texture2D(flyMaterial.mainTexture.width, flyMaterial.mainTexture.height,
                                             TextureFormat.RGBA32, false);
             texture_After.LoadImage(byte_After);
-            CreateFlap(texture_After, dat.id, addFlag);
+            CreateFlap(texture_After, dat.id);
             nameText.text = name;
             addingFlapDatas.RemoveAt(0);
-            addFlag = addFlag == 0 ? addFlag : addFlag - 1;
         }
     }
 
@@ -168,7 +165,7 @@ public class Displayer : MonoBehaviour
     /// <param name="texture">フラップ画像データ</param>
     /// <param name="id">フラップのID</param>
     /// <param name="addFlag">新規フラップの数</param>
-    void CreateFlap(Texture2D texture, int id, int addFlag)
+    void CreateFlap(Texture2D texture, int id)
 	{
         var flapObj = Instantiate(Flap);
         var f = flapObj.GetComponent<FlapWing>();
@@ -184,11 +181,8 @@ public class Displayer : MonoBehaviour
             obj = flapObj
         };
         flaps.Add(flap);
-        if (addFlag > 0)
-        {
-            EmitPosDiff(flap);
-            io.Emit("addFlap", JsonUtility.ToJson(new Ints { id = id }));
-        }
+        EmitPosDiff(flap);
+        io.Emit("addFlap", JsonUtility.ToJson(new Ints { id = id }));
     }
 
     public void Send()
