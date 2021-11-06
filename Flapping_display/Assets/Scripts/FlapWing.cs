@@ -9,7 +9,6 @@ public class FlapWing : MonoBehaviour
     [SerializeField] float speed = 2f;
     [SerializeField] Material flapMat;
     public Texture2D flapTexture;
-    public int id;
     float t = 0;
     public float y;
     void Start()

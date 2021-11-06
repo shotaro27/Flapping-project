@@ -49,6 +49,13 @@ public static class JsonHelper
     }
 }
 
+[Serializable]
+public class Flap
+{
+    public int id;
+    public GameObject obj;
+}
+
 public class Displayer : MonoBehaviour
 {
     [SerializeField]
@@ -60,8 +67,8 @@ public class Displayer : MonoBehaviour
     [SerializeField] SocketIOController io;
     [SerializeField]
     private GameObject Flap;
-    List<DataNameIDSet> flaps = new List<DataNameIDSet>();
-    List<GameObject> flapobjs = new List<GameObject>();
+	List<Flap> flaps = new List<Flap>();
+    List<DataNameIDSet> addingFlapDatas = new List<DataNameIDSet>();
     int addFlag = 0;
     private void Start()
     {
@@ -73,17 +80,17 @@ public class Displayer : MonoBehaviour
         io.On("emit_to_garden", (SocketIOEvent e) =>
         {
 			var f = EscapeAndFromJson<DataNameIDSet>(e);
-            flaps.Add(f);
+            addingFlapDatas.Add(f);
         });
         io.On("add_to_garden", (SocketIOEvent e) =>
         {
             var f = EscapeAndFromJson<DataNameIDSet>(e);
-            flaps.Add(f);
-            var oldfl = flapobjs.OrderBy(fl => fl.GetComponent<FlapWing>().id).FirstOrDefault();
-            flapobjs.Remove(oldfl);
-			var i = new Ints { id = oldfl.GetComponent<FlapWing>().id };
+            addingFlapDatas.Add(f);
+            var oldfl = flaps[0];
+            flaps.Remove(oldfl);
+			var i = new Ints { id = oldfl.id };
 			io.Emit("removeFlap", JsonUtility.ToJson(i));
-            Destroy(oldfl);
+            Destroy(oldfl.obj);
             addFlag++;
         });
         io.On("emit_from_server", (SocketIOEvent e) =>
@@ -95,7 +102,7 @@ public class Displayer : MonoBehaviour
         {
             var id = EscapeTrim(e);
             Debug.Log("access");
-            flapobjs.ForEach(EmitPosDiff);
+            flaps.ForEach(EmitPosDiff);
 			var i = new Ids { id = id };
 			io.Emit("sendFlapDatas", JsonUtility.ToJson(i));
         });
@@ -113,19 +120,19 @@ public class Displayer : MonoBehaviour
     /// 位置方向を送信する
     /// </summary>
     /// <param name="f">Flapのgameobject</param>
-    void EmitPosDiff(GameObject f)
+    void EmitPosDiff(Flap f)
 	{
-        var wing = f.GetComponent<FlapWing>();
+        var wing = f.obj.GetComponent<FlapWing>();
         var p = new IDPositionSet
         {
-            id = wing.id,
-            pos = f.transform.position
+            id = f.id,
+            pos = f.obj.transform.position
         };
         p.pos.y = wing.y;
         io.Emit("setPos", JsonUtility.ToJson(p));
         var d = new IDPositionSet
         {
-            id = wing.id,
+            id = f.id,
             pos = wing.diff
         };
         io.Emit("setDiff", JsonUtility.ToJson(d));
@@ -139,9 +146,9 @@ public class Displayer : MonoBehaviour
 
     private void Update()
     {
-		if (flaps.Count > 0)
+		if (addingFlapDatas.Count > 0)
         {
-            DataNameIDSet dat = flaps[0];
+            var dat = addingFlapDatas[0];
             var textureData = dat.data;
             var name = dat.name;
             byte[] byte_After = Convert.FromBase64String(textureData);
@@ -150,7 +157,7 @@ public class Displayer : MonoBehaviour
             texture_After.LoadImage(byte_After);
             CreateFlap(texture_After, dat.id, addFlag);
             nameText.text = name;
-            flaps.RemoveAt(0);
+            addingFlapDatas.RemoveAt(0);
             addFlag = addFlag == 0 ? addFlag : addFlag - 1;
         }
     }
@@ -163,16 +170,20 @@ public class Displayer : MonoBehaviour
     /// <param name="addFlag">新規フラップの数</param>
     void CreateFlap(Texture2D texture, int id, int addFlag)
 	{
-        var flap = Instantiate(Flap);
-        var f = flap.GetComponent<FlapWing>();
+        var flapObj = Instantiate(Flap);
+        var f = flapObj.GetComponent<FlapWing>();
         f.flapTexture = texture;
-        f.id = id;
         var diff = new Vector3(UnityEngine.Random.Range(-3f, 3f), 0, UnityEngine.Random.Range(-3f, 3f)).normalized;
         transform.position += Vector3.forward * UnityEngine.Random.Range(-3f, 3f);
         transform.position += Vector3.right * UnityEngine.Random.Range(-3f, 3f);
         f.y = UnityEngine.Random.Range(-3f, 3f);
         f.diff = diff;
-        flapobjs.Add(flap);
+        var flap = new Flap()
+        {
+            id = id,
+            obj = flapObj
+        };
+        flaps.Add(flap);
         if (addFlag > 0)
         {
             EmitPosDiff(flap);
@@ -182,11 +193,11 @@ public class Displayer : MonoBehaviour
 
     public void Send()
     {
-		foreach (var f in flapobjs)
+		foreach (var f in flaps)
 		{
             var set = new IDPositionSet();
-            set.id = f.GetComponent<FlapWing>().id;
-            set.pos = f.transform.position;
+            set.id = f.id;
+            set.pos = f.obj.transform.position;
             var s = JsonUtility.ToJson(set);
             Debug.Log(s);
 			io.Emit("emit_from_client", s);
