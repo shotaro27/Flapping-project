@@ -44,17 +44,6 @@ public struct IDPositionSet : IIDCountable
 public class ButterflyController : MonoBehaviour
 {
     /// <summary>
-    /// ローカルストレージから値を取得する
-    /// </summary>
-    /// <param name="key">値のキー</param>
-    /// <returns>取得した値</returns>
-#if UNITY_WEBGL && !UNITY_EDITOR
-	[DllImport("__Internal")] private static extern string GetLocalStorage(string key);
-#else
-    private static string GetLocalStorage(string key) => PlayerPrefs.GetString(key, "");
-#endif
-
-    /// <summary>
     /// FlapのベースMaterial
     /// </summary>
     [SerializeField] private Material flyMaterial;

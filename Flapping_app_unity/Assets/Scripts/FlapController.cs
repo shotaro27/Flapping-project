@@ -64,6 +64,11 @@ public class FlapController : MonoBehaviour
     /// </summary>
     [SerializeField] private SkyboxSetter sky;
 
+    /// <summary>
+    /// ガーデンからの詳細表示か
+    /// </summary>
+    internal static bool isGardenDetail = false;
+
     Texture2D flapTexture;
     void Start()
     {
@@ -136,6 +141,12 @@ public class FlapController : MonoBehaviour
 
     public void BackBook()
 	{
+		if (isGardenDetail)
+        {
+            isGardenDetail = false;
+            SceneManager.LoadScene("FlyingScene");
+            return;
+        }
         if (PictureProvider.isMyFlap)
         {
             SceneManager.LoadScene("MyFlapScene");

@@ -121,6 +121,18 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &53737923 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 11460792, guid: cbe5119cf3bbba94aabd5ace819dae01,
+    type: 3}
+  m_PrefabInstance: {fileID: 165728289}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7e6021b6709d4841b7d36056e5d2743, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &165728289
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -525,7 +537,7 @@ MonoBehaviour:
   normalTexture: {fileID: 2800000, guid: e617babdddc3e9b4fb215fdbf891c195, type: 3}
   flyMaterial: {fileID: 2100000, guid: 45edcb323b7f85a408781019f261ab88, type: 2}
   nameText: {fileID: 1037999461}
-  io: {fileID: 1484086026}
+  io: {fileID: 53737923}
   FlapPrefab: {fileID: 8902105164216912437, guid: f107152872ddb1b4bb871462d388cf4c,
     type: 3}
 --- !u!1 &1297402185
@@ -696,15 +708,3 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cbe5119cf3bbba94aabd5ace819dae01, type: 3}
---- !u!114 &1484086026 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 11460792, guid: cbe5119cf3bbba94aabd5ace819dae01,
-    type: 3}
-  m_PrefabInstance: {fileID: 1484086025}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d7e6021b6709d4841b7d36056e5d2743, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

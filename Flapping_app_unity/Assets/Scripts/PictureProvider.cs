@@ -91,6 +91,10 @@ public class PictureProvider : MonoBehaviour
             {
                 SetPage(page);
             }
+			if (FlapController.isGardenDetail && d.id == dataNameIDSets.Count - 1)
+			{
+                SceneManager.LoadScene("PictureDetailScene");
+			}
             pagenation.SetPagenation(page, lastPage, prev, next);
         });
         io.On("sendFlapData", e =>
@@ -142,8 +146,11 @@ public class PictureProvider : MonoBehaviour
     /// <param name="page">ページ</param>
 	internal void SetPage(int page)
     {
-        PictureProvider.page = page;
-        SetFlapData(page);
+		if (!FlapController.isGardenDetail)
+        {
+            PictureProvider.page = page;
+            SetFlapData(page);
+        }
     }
 
     /// <summary>

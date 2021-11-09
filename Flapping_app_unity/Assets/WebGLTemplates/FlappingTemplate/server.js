@@ -101,53 +101,59 @@ var urlParser = require('url'),
 	fs = require("fs"),
 	io = require("socket.io")(app);
 	// ws = require ('ws').Server;
+
 app.listen(process.env.PORT || 8000);
+
 var flaps = [];
-var positions = [];
-var diffs = [];
+var IDinGarden = [];
+
 getData().then((f) => {
-	flaps = f;
+	flaps = f.map(fl => ({id: fl.id, data: fl.data, name: fl.name, pos: {x: 0, y: 0, z: 0}, diff: {x: 0, y: 0, z: 0}}));
 	flaps.sort((a, b) => a.id - b.id);
-	positions = flaps.map(fl => ({id: fl.id, pos: {x: 0, y: 0, z: 0}}));
-	diffs = flaps.map(fl => ({id: fl.id, pos: {x: 0, y: 0, z: 0}}));
-	console.log(diffs);
+	for (let index = flaps.length - 15; index < flaps.length; index++) IDinGarden.push(index);
 }).catch((ex) => console.log(ex.message));
+
 io.on('connection', function (socket) {
 	console.log("connected");
 	socket.emit("emit_from_server", "connected");
+
 	socket.on("emit_from_client", function (d) {
-		var now = new Date();
 		var data = {data: d.data, name: d.name, id: flaps.length};
-		// console.log(d);
-		// console.log (now.toLocaleString() + ' Received: %s', data);
 		socket.broadcast.emit("emit_from_server", data);
 		saveData(data).then(() => console.log('Done')).catch((ex) => console.log(ex.message));
-		flaps.push(data);
-		positions.push({id: data.id, pos: {x: 0, y: 0, z: 0}});
-		diffs.push({id: data.id, pos: {x: 0, y: 0, z: 0}});
+		flaps.push({id: data.id, data: data.data, name: data.name, pos: {x: 0, y: 0, z: 0}, diff: {x: 0, y: 0, z: 0}});
 		socket.broadcast.emit("add_to_garden", JSON.stringify(data));
+		IDinGarden.push(data.id);
+		IDinGarden.shift();
 	});
-	socket.on("setPos", d => {positions.filter(f => f.id == d.id)[0].pos = d.pos; console.log(d.pos);});
-	socket.on("setDiff", d => {diffs.filter(f => f.id == d.id)[0].pos = d.pos; console.log(d.pos);});
+
+	socket.on("getLastFlapID", function () {
+		socket.emit("lastFlapID", flaps.length);
+	});
+
+	socket.on("addFlapID", function (d) {
+		var f = flaps.filter(f => f.id == d.id)[0];
+		socket.broadcast.emit("add_to_garden", JSON.stringify({id: f.id, data: f.data, name: f.name}));
+		IDinGarden.push(d.id);
+		IDinGarden.shift();
+	});
+
+	socket.on("setPos", d => {flaps.filter(f => f.id == d.id)[0].pos = d.pos; console.log(d.pos);});
+
+	socket.on("setDiff", d => {flaps.filter(f => f.id == d.id)[0].diff = d.pos; console.log(d.pos);});
+
 	socket.on("sendFlapDatas", function (d) {
 		console.log("send");
-		for (const p of positions.slice(-15)) {
-			console.log(p.pos);
-			io.to(d.id).emit("pos_set", JSON.stringify(p));
-		}
-		for (const df of diffs.slice(-15)) {
-			io.to(d.id).emit("diff_set", JSON.stringify(df));
-		}
-		for (const f of flaps.slice(-15)) {
-			io.to(d.id).emit("data_set", JSON.stringify(f));
+		for (const id of IDinGarden) {
+			var f = flaps.filter(f => f.id == id)[0];
+			io.to(d.id).emit("pos_set", JSON.stringify({id: id, pos: f.pos}));
+			io.to(d.id).emit("diff_set", JSON.stringify({id: id, pos: f.diff}));
+			io.to(d.id).emit("data_set", JSON.stringify({id: id, data: f.data, name: f.name}));
 		}
 	});
+
 	socket.on("getFlapData", function (d) {
-		// if (flaps.some(f => f.id == d.id)) {
-		// 	socket.emit("flapData", JSON.stringify(flaps.filter(f => f.id == d.id)[0]));
-		// } else {
-		// 	socket.emit("flapData", JSON.stringify({data: null, name: null, id: d.id}));
-		// }
+		socket.emit("flapCount", flaps.length);
 		for (const f of flaps.slice(d.id)) {
 			socket.emit("flapData", JSON.stringify(f));
 		}
@@ -155,17 +161,23 @@ io.on('connection', function (socket) {
 			socket.emit("sendFlapData", "");
 		}
 	});
+
 	socket.on("addFlap", function (d) {
-		socket.broadcast.emit("pos_set", JSON.stringify(positions.filter(f => f.id == d.id)[0]));
-		socket.broadcast.emit("diff_set", JSON.stringify(diffs.filter(f => f.id == d.id)[0]));
-		socket.broadcast.emit("data_set", JSON.stringify(flaps.filter(f => f.id == d.id)[0]));
+		var f = flaps.filter(f => f.id == d.id)[0];
+		socket.broadcast.emit("pos_set", JSON.stringify({id: f.id, pos: f.pos}));
+		socket.broadcast.emit("diff_set", JSON.stringify({id: f.id, pos: f.diff}));
+		socket.broadcast.emit("data_set", JSON.stringify({id: f.id, data: f.data, name: f.name}));
 	});
+
 	socket.on("removeFlap", d => socket.broadcast.emit("remove_flap", d.id));
+
 	socket.on("emit_from_viewer", function () {
 		console.log("flap");
 		socket.broadcast.emit("accessFromViewer", socket.id);
 	});
-	for (const f of flaps.slice(-15)) {
+
+	for (const id of IDinGarden) {
+		var f = flaps.filter(f => f.id == id)[0];
 		socket.emit("emit_to_garden", JSON.stringify(f));
 	}
 });

@@ -275,11 +275,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11460792, guid: cbe5119cf3bbba94aabd5ace819dae01, type: 3}
       propertyPath: settings.url
-      value: localhost
+      value: flapping-app.azurewebsites.net
       objectReference: {fileID: 0}
     - target: {fileID: 11460792, guid: cbe5119cf3bbba94aabd5ace819dae01, type: 3}
       propertyPath: settings.port
-      value: 8000
+      value: 80
       objectReference: {fileID: 0}
     - target: {fileID: 11460792, guid: cbe5119cf3bbba94aabd5ace819dae01, type: 3}
       propertyPath: settings.sslEnabled

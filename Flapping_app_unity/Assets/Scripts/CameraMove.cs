@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 /// <summary>
 /// カメラ移動
@@ -24,6 +25,9 @@ public class CameraMove : MonoBehaviour
     public bool[] ds = { false, false, false, false, false, false };
 
     [SerializeField] private GameObject goPictureBook;
+    [SerializeField] private List<GameObject> inObjs;
+    [SerializeField] private List<GameObject> outObjs;
+    [SerializeField] private Text nameText;
     bool isMouseDown;
 	Camera cam;
 	private void Start()
@@ -49,10 +53,9 @@ public class CameraMove : MonoBehaviour
                 {
                     goPictureBook.SetActive(true);
                     goPictureBook.GetComponent<ButterflyTrack>().TargetButterfly = fl.gameObject;
-                }
-                else
-                {
-                    goPictureBook.SetActive(false);
+                    inObjs.ForEach(o => o.SetActive(true));
+                    outObjs.ForEach(o => o.SetActive(false));
+                    nameText.text = fl.flapName;
                 }
                 isMouseDown = true;
             }
@@ -85,5 +88,12 @@ public class CameraMove : MonoBehaviour
         {
             ds[d] = false;
         }
+    }
+
+    public void BackCamera()
+    {
+        goPictureBook.SetActive(false);
+        outObjs.ForEach(o => o.SetActive(true));
+        inObjs.ForEach(o => o.SetActive(false));
     }
 }
