@@ -88,11 +88,13 @@ public class FlapController : MonoBehaviour
         anim.Play(info.shortNameHash, -1, 0.25f);
 
         //前へ/次へボタンの表示切り替え
-		if (d.id == 0)
+		if ((PictureProvider.isMyFlap && d.id == Settings.MyFlaps[0])
+            || (!PictureProvider.isMyFlap && d.id == 0))
 		{
             prev.SetActive(false);
         }
-        if (d.id == PictureProvider.dataNameIDSets.Count - 1)
+        if ((PictureProvider.isMyFlap && d.id == Settings.MyFlaps[Settings.MyFlaps.Count - 1])
+            || (!PictureProvider.isMyFlap && d.id == PictureProvider.dataNameIDSets.Count - 1))
         {
             next.SetActive(false);
         }
@@ -107,12 +109,12 @@ public class FlapController : MonoBehaviour
     /// <summary>
     /// 前の詳細に戻る
     /// </summary>
-    public void PrevDetail() => ShowDetail(id - 1);
+    public void PrevDetail() => ShowDetail(PictureProvider.isMyFlap ? Settings.MyFlaps[Settings.MyFlaps.IndexOf(id) - 1] : id - 1);
 
     /// <summary>
     /// 次の詳細に進む
     /// </summary>
-    public void NextDetail() => ShowDetail(id + 1);
+    public void NextDetail() => ShowDetail(PictureProvider.isMyFlap ? Settings.MyFlaps[Settings.MyFlaps.IndexOf(id) + 1] : id + 1);
 
     /// <summary>
     /// 指定されたIDのFlap詳細を表示
@@ -130,5 +132,17 @@ public class FlapController : MonoBehaviour
         Settings.Id = id;
         Settings.DrawingFlap = flapTexture;
         Settings.mode = DrawMode.Open;
+	}
+
+    public void BackBook()
+	{
+        if (PictureProvider.isMyFlap)
+        {
+            SceneManager.LoadScene("MyFlapScene");
+        }
+		else
+		{
+            SceneManager.LoadScene("DictionaryScene");
+		}
 	}
 }

@@ -46,7 +46,8 @@ public class PictureProvider : MonoBehaviour
     /// サーバーから読み込んだFlapデータのリスト
     /// </summary>
     public static List<DataNameIDSet> dataNameIDSets = new List<DataNameIDSet>();
-    
+    List<DataNameIDSet> flapDatas;
+
     /// <summary>
     /// 現在のページ
     /// </summary>
@@ -57,6 +58,11 @@ public class PictureProvider : MonoBehaviour
     /// </summary>
     int lastPage = 1;
 
+    /// <summary>
+    /// myflapで開いているか
+    /// </summary>
+    public static bool isMyFlap = false;
+
     void Start()
     {
         lastPage = (int)Mathf.Ceil((dataNameIDSets.Count - 1) / 6f);
@@ -66,14 +72,20 @@ public class PictureProvider : MonoBehaviour
             io.Emit("getFlapData", JsonUtility.ToJson(new Ids { id = dataNameIDSets.Count }));
         });
         io.Connect();
+        io.On("flapCount", e =>
+        {
+            var count = int.Parse(e.data);
+            var dcount = dataNameIDSets.Count;
+			for (int i = dcount; i < count; i++)
+			{
+                dataNameIDSets.Add(new DataNameIDSet() { id = i });
+			}
+        });
         io.On("flapData", e =>
         {
             var d = e.EscapeAndFromJson<DataNameIDSet>();
             var dat = d.data;
-            if (!dataNameIDSets.Exists(f => f.id == d.id))
-            {
-                dataNameIDSets.Add(d);
-            }
+            dataNameIDSets[d.id] = d;
             lastPage = (int)Mathf.Ceil(d.id / 6f);
             if (d.id >= page * 6 - 1 && load.activeSelf)
             {
@@ -93,27 +105,29 @@ public class PictureProvider : MonoBehaviour
     /// <param name="page">ページ</param>
     void SetFlapData(int page)
     {
+        flapDatas = isMyFlap ? Settings.MyFlaps.Select(flID => dataNameIDSets[flID]).ToList() : dataNameIDSets;
         var flag = false;
         for (int i = page * 6 - 6; i < page * 6; i++)
         {
-            var e = dataNameIDSets.Exists(f => f.id == i);
+            var e = 0 <= i && i < flapDatas.Count;
             if (!e || flag)
             {
                 flaps[i % 6].SetActive(false);
                 flag = true;
                 continue;
             }
-            var d = dataNameIDSets.First(f => f.id == i);
+            Debug.Log(flapDatas[i].name);
+            var d = flapDatas[i];
             var dat = d.data;
             var bytes = Convert.FromBase64String(dat);
             var t = new Texture2D(textureReference.width, textureReference.height, TextureFormat.RGBA32, false);
             t.LoadImage(bytes);
             var sp = Sprite.Create(t, new Rect(0, 0, t.width, t.height), Vector2.zero);
-            flaps[d.id % 6].SetActive(true);
-            flaps[d.id % 6].transform.GetChild(1).GetComponent<Image>().sprite = sp;
-            flaps[d.id % 6].transform.GetChild(2).GetComponent<Image>().sprite = sp;
+            flaps[i % 6].SetActive(true);
+            flaps[i % 6].transform.GetChild(1).GetComponent<Image>().sprite = sp;
+            flaps[i % 6].transform.GetChild(2).GetComponent<Image>().sprite = sp;
         }
-        pagenation.SetPagenation(page, lastPage, prev, next);
+        pagenation.SetPagenation(page, (int)Mathf.Ceil((flapDatas.Count - 1) / 6f), prev, next);
         load.SetActive(false);
     }
 
@@ -158,7 +172,21 @@ public class PictureProvider : MonoBehaviour
     /// <param name="id">FlapのID</param>
     public void ShowDetail(int id)
 	{
-        FlapController.id = page * 6 - 6 + id;
+        FlapController.id = flapDatas[(page - 1) * 6 + id].id;
         SceneManager.LoadScene("PictureDetailScene");
 	}
+
+    public void GoMyflap()
+	{
+        isMyFlap = true;
+        page = 1;
+        SceneManager.LoadScene("MyFlapScene");
+    }
+
+    public void BackMyflap()
+    {
+        isMyFlap = false;
+        page = 1;
+        SceneManager.LoadScene("DictionaryScene");
+    }
 }

@@ -2,9 +2,9 @@
 using UnityEngine;
 using UnitySocketIO;
 using UnitySocketIO.Events;
-using System.Runtime.InteropServices;
 using System;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 [Serializable]
 public class DataNameSet
@@ -39,13 +39,6 @@ public class FlyButton : MonoBehaviour
     /// 戻るボタン
     /// </summary>
     [SerializeField] Button back;
-
-    /// <summary>
-    /// ローカルストレージに値を設定する
-    /// </summary>
-    /// <param name="key">キー</param>
-    /// <param name="value">値</param>
-    [DllImport("__Internal")] private static extern void SetLocalStorage(string key, string value);
 
     int lastFlapID;
 
@@ -101,12 +94,15 @@ public class FlyButton : MonoBehaviour
             string dataStr = JsonUtility.ToJson(set);
             Debug.Log(dataStr);
             io.Emit("emit_from_client", dataStr);
-            SetLocalStorage(Settings.SaveSlot.ToString(), dataStr);
         }
 		else
-		{
+        {
             io.Emit("addFlapID", JsonConvert.SerializeObject(new Ids() {id = Settings.Id}));
-		}
+            var stString = Storage.GetLocalStorage("MyFlap");
+            var myFlaps = JsonConvert.DeserializeObject<List<int>>(string.IsNullOrEmpty(stString) ? "[]" : stString);
+            myFlaps.Add(Settings.Id);
+            Storage.SetLocalStorage("MyFlap", JsonConvert.SerializeObject(myFlaps));
+        }
     }
 
     /// <summary>

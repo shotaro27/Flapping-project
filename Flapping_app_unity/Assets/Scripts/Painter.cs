@@ -449,4 +449,10 @@ public class Painter : MonoBehaviour
         (int)v.x * (int)rect.width / textureBase.width,
         (int)v.y * (int)rect.height / textureBase.height
     );
+
+    /// <summary>
+    /// Flapの名前設定
+    /// </summary>
+    /// <param name="s">Flap名前</param>
+    public void SetName(string s) => Settings.FlapName = s;
 }

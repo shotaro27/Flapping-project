@@ -6,6 +6,7 @@ using UnitySocketIO;
 using UnitySocketIO.Events;
 using Newtonsoft.Json;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 /// <summary>
 /// IDを含む
@@ -43,6 +44,17 @@ public struct IDPositionSet : IIDCountable
 public class ButterflyController : MonoBehaviour
 {
     /// <summary>
+    /// ローカルストレージから値を取得する
+    /// </summary>
+    /// <param name="key">値のキー</param>
+    /// <returns>取得した値</returns>
+#if UNITY_WEBGL && !UNITY_EDITOR
+	[DllImport("__Internal")] private static extern string GetLocalStorage(string key);
+#else
+    private static string GetLocalStorage(string key) => PlayerPrefs.GetString(key, "");
+#endif
+
+    /// <summary>
     /// FlapのベースMaterial
     /// </summary>
     [SerializeField] private Material flyMaterial;
@@ -66,6 +78,13 @@ public class ButterflyController : MonoBehaviour
     /// ローディングのGameObject
     /// </summary>
     [SerializeField] private GameObject load;
+
+    /// <summary>
+    /// myFlapをセットするか
+    /// </summary>
+    [SerializeField] private bool forceSetMyFlap;
+
+    [SerializeField] private List<int> myFlapList;
 
     /// <summary>
     /// サーバーから受信したFlapデータのリスト
@@ -113,6 +132,11 @@ public class ButterflyController : MonoBehaviour
     }
     private void Start()
     {
+		if (forceSetMyFlap) Storage.SetLocalStorage("MyFlap", JsonConvert.SerializeObject(myFlapList));
+        var stString = Storage.GetLocalStorage("MyFlap");
+        var myFlaps = JsonConvert.DeserializeObject<List<int>>(string.IsNullOrEmpty(stString) ? "[]" : stString);
+        Settings.MyFlaps = myFlaps;
+        Debug.Log(stString);
         io.On("connect", e =>
         {
             Debug.Log("SocketIO connected");
@@ -151,7 +175,6 @@ public class ButterflyController : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(flaps.Count);
         while (flaps.Count > 0)
         {
             Debug.Log("create");

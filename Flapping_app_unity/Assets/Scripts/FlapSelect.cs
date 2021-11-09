@@ -10,16 +10,9 @@ using System;
 public class FlapSelect : MonoBehaviour
 {
     /// <summary>
-    /// ローカルストレージから値を取得する
-    /// </summary>
-    /// <param name="key">値のキー</param>
-    /// <returns>取得した値</returns>
-	[DllImport("__Internal")] private static extern string GetLocalStorage(string key);
-
-    /// <summary>
     /// テクスチャのサイズイメージ
     /// </summary>
-	[SerializeField] Texture2D textureReference;
+    [SerializeField] Texture2D textureReference;
 
     /// <summary>
     /// 保存されたFlapを表示するTransform
@@ -38,7 +31,7 @@ public class FlapSelect : MonoBehaviour
         isNew = new List<bool>(flaps.Count);
         for (int slot = 0; slot < flaps.Count; slot++)
         {
-            string s = GetLocalStorage(slot.ToString());
+            string s = Storage.GetLocalStorage(slot.ToString());
             if (string.IsNullOrEmpty(s))
             {
                 flaps[slot].GetChild(2).gameObject.SetActive(false);
@@ -94,7 +87,7 @@ public class FlapSelect : MonoBehaviour
     public void SetOpen(int slot)
     {
         Settings.SaveSlot = slot;
-		string s = GetLocalStorage(slot.ToString());
+		string s = Storage.GetLocalStorage(slot.ToString());
         var f = JsonUtility.FromJson<DataNameSet>(s);
         var dat = f.data;
         Settings.FlapName = f.name;

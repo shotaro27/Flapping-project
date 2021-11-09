@@ -19,7 +19,7 @@ public class Pagenation : MonoBehaviour
             {
                 var pi = Instantiate(p, transform);
                 var rt = pi.GetComponent<RectTransform>();
-                rt.anchoredPosition += Vector2.right * (rt.rect.width + 5) * (i - 2);
+                rt.anchoredPosition += Vector2.right * 80 * (i - 2);
                 var pageNum = i + min;
                 pi.GetComponentInChildren<Text>().text = pageNum.ToString();
 				if (pageNum == page)
