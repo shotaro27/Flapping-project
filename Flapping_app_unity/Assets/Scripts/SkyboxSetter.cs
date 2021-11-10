@@ -14,6 +14,8 @@ public class SkyboxSetter : MonoBehaviour
         public Sprite SkyboxImage;
     }
     [SerializeField] List<SkyboxImageSet> Skyboxes;
+    [SerializeField] bool isBlack;
+    [SerializeField] GameObject black;
     public int DefaultSkyboxState;
     internal int skyboxState;
     Button setter;
@@ -32,5 +34,16 @@ public class SkyboxSetter : MonoBehaviour
         skyboxState = (skyboxState + 1) % Skyboxes.Count;
         ((Image)setter.targetGraphic).sprite = Skyboxes[skyboxState].SkyboxImage;
         RenderSettings.skybox = Skyboxes[skyboxState].SkyboxMaterial;
+		if (isBlack)
+		{
+            if (skyboxState == 2)
+            {
+                black.SetActive(true);
+            }
+            else
+			{
+                black.SetActive(false);
+			}
+        }
     }
 }

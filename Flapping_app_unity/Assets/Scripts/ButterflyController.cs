@@ -202,6 +202,16 @@ public class ButterflyController : MonoBehaviour
         flapobjs.Add(flap);
         flapIDs = flapobjs.Select(f => f.GetComponent<FlapWing>().id).ToList();
     }
+
+    /// <summary>
+    /// 新しいFlapを作る
+    /// </summary>
+    public void SetNew()
+    {
+        Settings.DrawingFlap = null;
+        Settings.FlapName = null;
+        Settings.mode = DrawMode.New;
+    }
 }
 
 public static class SocketIOEventEx
