@@ -95,6 +95,8 @@ public class ButterflyController : MonoBehaviour
     /// </summary>
     private List<GameObject> flapobjs = new List<GameObject>();
 
+    internal static List<int> flapIDs = new List<int>();
+
     /// <summary>
     /// Socket.ioで受信したデータを、既にIDが存在していない場合のみリストに追加する
     /// </summary>
@@ -152,6 +154,7 @@ public class ButterflyController : MonoBehaviour
             Destroy(oldfl);
             positions.RemoveAll(p => p.id == id);
             diffs.RemoveAll(d => d.id == id);
+            flapIDs = flapobjs.Select(f => f.GetComponent<FlapWing>().id).ToList();
         });
     }
 
@@ -197,6 +200,7 @@ public class ButterflyController : MonoBehaviour
         fl.y = flpos.y;
         fl.diff = diffs.Where(f => f.id == id).Select(f => f.pos).FirstOrDefault();
         flapobjs.Add(flap);
+        flapIDs = flapobjs.Select(f => f.GetComponent<FlapWing>().id).ToList();
     }
 }
 

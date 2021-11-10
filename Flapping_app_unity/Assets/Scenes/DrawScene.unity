@@ -9978,9 +9978,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selects: {fileID: 1483982415}
-  toolImage: {fileID: 0}
-  enableImageChanging: 0
-  Images: []
+  toolImage: {fileID: 2122912550}
+  enableImageChanging: 1
+  Images:
+  - {fileID: 3802333305866014243, guid: 2788d4e58d635224fb61c028060d5334, type: 3}
+  - {fileID: 3070178493847733030, guid: 2788d4e58d635224fb61c028060d5334, type: 3}
+  - {fileID: 4388466436548015014, guid: 2788d4e58d635224fb61c028060d5334, type: 3}
+  - {fileID: 4918266992842447168, guid: 2788d4e58d635224fb61c028060d5334, type: 3}
+  - {fileID: 3786418668366234162, guid: 2788d4e58d635224fb61c028060d5334, type: 3}
   Bar: {fileID: 1483982413}
   painter: {fileID: 1349239492}
 --- !u!114 &2122912553

@@ -65,6 +65,11 @@ public class FlapController : MonoBehaviour
     [SerializeField] private SkyboxSetter sky;
 
     /// <summary>
+    /// Flyボタン
+    /// </summary>
+    [SerializeField] private GameObject fly;
+
+    /// <summary>
     /// ガーデンからの詳細表示か
     /// </summary>
     internal static bool isGardenDetail = false;
@@ -102,6 +107,10 @@ public class FlapController : MonoBehaviour
             || (!PictureProvider.isMyFlap && d.id == PictureProvider.dataNameIDSets.Count - 1))
         {
             next.SetActive(false);
+        }
+		if (ButterflyController.flapIDs.Contains(id))
+		{
+            fly.SetActive(false);
         }
     }
 

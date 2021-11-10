@@ -990,6 +990,7 @@ MonoBehaviour:
   next: {fileID: 1698084126}
   prev: {fileID: 1953062566}
   sky: {fileID: 2047836026}
+  fly: {fileID: 1676397688}
 --- !u!1 &1618968085
 GameObject:
   m_ObjectHideFlags: 0

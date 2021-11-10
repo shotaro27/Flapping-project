@@ -76,7 +76,11 @@ public class PictureProvider : MonoBehaviour
         {
             var count = int.Parse(e.data);
             var dcount = dataNameIDSets.Count;
-			for (int i = dcount; i < count; i++)
+            if (FlapController.isGardenDetail && count <= dcount)
+            {
+                SceneManager.LoadScene("PictureDetailScene");
+            }
+            for (int i = dcount; i < count; i++)
 			{
                 dataNameIDSets.Add(new DataNameIDSet() { id = i });
 			}
@@ -131,7 +135,7 @@ public class PictureProvider : MonoBehaviour
             flaps[i % 6].transform.GetChild(1).GetComponent<Image>().sprite = sp;
             flaps[i % 6].transform.GetChild(2).GetComponent<Image>().sprite = sp;
         }
-        pagenation.SetPagenation(page, (int)Mathf.Ceil((flapDatas.Count - 1) / 6f), prev, next);
+        pagenation.SetPagenation(page, (int)Mathf.Ceil(flapDatas.Count / 6f), prev, next);
         load.SetActive(false);
     }
 

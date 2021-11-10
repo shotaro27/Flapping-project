@@ -33,7 +33,7 @@ public class SelectWeight : MonoBehaviour
         {
             var selectS = int.Parse(selects.ActiveToggles().First().gameObject.name);
             painter.Weight = selectS;
-            if (enableImageChanging) toolImage.sprite = Images[selectS];
+            if (enableImageChanging) toolImage.sprite = Images[selects.ActiveToggles().First().gameObject.transform.GetSiblingIndex()];
             OnSelected(false);
         }
     }
