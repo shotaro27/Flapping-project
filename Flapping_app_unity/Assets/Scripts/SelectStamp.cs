@@ -33,7 +33,7 @@ public class SelectStamp : MonoBehaviour
     {
         if (c)
         {
-            var selectS = int.Parse(selects.ActiveToggles().First().gameObject.name);
+            var selectS = selects.ActiveToggles().First().gameObject.transform.GetSiblingIndex();
             painter.selectedStamp = stamps[selectS];
             if (enableImageChanging) toolImage.sprite = Images[selectS];
             OnSelected(false);

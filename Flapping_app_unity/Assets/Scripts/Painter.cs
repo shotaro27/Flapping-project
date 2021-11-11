@@ -244,7 +244,7 @@ public class Painter : MonoBehaviour
                 case DrawingTools.Stamp:
                     if (!isDrawing)
                     {
-                        var size = new Vector2Int(120, 120);
+                        var size = new Vector2Int((int)(selectedStamp.width * 0.3f), (int)(selectedStamp.height * 0.3f));
 						var rt = RenderTexture.GetTemporary(size.x, size.y);
 						Graphics.Blit(selectedStamp, rt);
 						var preRT = RenderTexture.active;
