@@ -95,6 +95,8 @@ public class ButterflyController : MonoBehaviour
     /// </summary>
     private List<GameObject> flapobjs = new List<GameObject>();
 
+    List<int> removeIDs = new List<int>();
+
     internal static List<int> flapIDs = new List<int>();
 
     /// <summary>
@@ -149,13 +151,26 @@ public class ButterflyController : MonoBehaviour
         //Flap削除
         io.On("remove_flap", e => {
             var id = int.Parse(e.data);
-            var oldfl = flapobjs.FirstOrDefault(fl => fl.GetComponent<FlapWing>().id == id); //削除対象の古いFlap
-            flapobjs.Remove(oldfl);
-            Destroy(oldfl);
-            positions.RemoveAll(p => p.id == id);
-            diffs.RemoveAll(d => d.id == id);
-            flapIDs = flapobjs.Select(f => f.GetComponent<FlapWing>().id).ToList();
+            removeIDs.Add(id);
+            Invoke("RemoveFlap", 3);
         });
+    }
+
+    void RemoveFlap()
+	{
+        var id = removeIDs[0];
+        removeIDs.RemoveAt(0);
+        var oldfl = flapobjs.FirstOrDefault(fl => fl.GetComponent<FlapWing>().id == id); //削除対象の古いFlap
+        flapobjs.Remove(oldfl);
+        var ps = oldfl.transform.GetChild(0).GetChild(3).GetComponent<ParticleSystem>();
+        var particle = ps.gameObject;
+        var newP = Instantiate(particle, oldfl.transform.position, oldfl.transform.rotation);
+        newP.GetComponent<ParticleSystem>().Play();
+        Destroy(newP, ps.main.startLifetime.constant);
+        Destroy(oldfl);
+        positions.RemoveAll(p => p.id == id);
+        diffs.RemoveAll(d => d.id == id);
+        flapIDs = flapobjs.Select(f => f.GetComponent<FlapWing>().id).ToList();
     }
 
     //flyMaterialを初期化してSocket.ioを閉じる。閉じないとサーバーに負担がかかり続ける

@@ -157,12 +157,12 @@ public class Displayer : MonoBehaviour
     /// <param name="id">フラップのID</param>
     void CreateFlap(Texture2D texture, int id)
 	{
-        var flapObj = Instantiate(FlapPrefab);
+        var flapObj = Instantiate(FlapPrefab, Vector3.zero, Quaternion.identity);
         var f = flapObj.GetComponent<FlapWing>();
         f.flapTexture = texture;
         var diff = new Vector3(UnityEngine.Random.Range(-3f, 3f), 0, UnityEngine.Random.Range(-3f, 3f)).normalized;
-        transform.position += Vector3.forward * UnityEngine.Random.Range(-3f, 3f);
-        transform.position += Vector3.right * UnityEngine.Random.Range(-3f, 3f);
+        flapObj.transform.position += Vector3.forward * UnityEngine.Random.Range(-1f, 9f);
+        flapObj.transform.position += Vector3.right * UnityEngine.Random.Range(-8f, 8f);
         f.altitude = UnityEngine.Random.Range(-3f, 3f);
         f.diff = diff;
         var flap = new Flap()
