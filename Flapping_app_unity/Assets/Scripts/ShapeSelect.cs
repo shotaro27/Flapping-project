@@ -34,7 +34,6 @@ public abstract class SettingsToggle
             s.onValueChanged.AddListener(ChangeToggle);
         }
         currentToggle.isOn = true;
-        currentToggle.gameObject.GetComponentsInChildren<Image>()[1].color = Color.cyan;
         ChangeToggle(true);
     }
 
@@ -125,7 +124,6 @@ public class ShapeSelect : MonoBehaviour
             s.onValueChanged.AddListener(ChangeShape);
         }
         shapeToggle.isOn = true;
-        shapeToggle.gameObject.GetComponentsInChildren<Image>()[1].color = Color.cyan;
         ChangeShape(true);
 
         foreach (var s in shapeToggles)
@@ -140,7 +138,6 @@ public class ShapeSelect : MonoBehaviour
             m.onValueChanged.AddListener(ChangeMaterial);
         }
         materialToggle.isOn = true;
-        materialToggle.gameObject.GetComponentsInChildren<Image>()[1].color = Color.cyan;
         ChangeMaterial(true);
 
         Painter.textureHistory = new List<Color[]>();

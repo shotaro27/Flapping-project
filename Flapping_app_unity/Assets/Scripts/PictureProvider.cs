@@ -48,6 +48,8 @@ public class PictureProvider : MonoBehaviour
     public static List<DataNameIDSet> dataNameIDSets = new List<DataNameIDSet>();
     List<DataNameIDSet> flapDatas;
 
+    [SerializeField] GameObject myFlap;
+
     /// <summary>
     /// 現在のページ
     /// </summary>
@@ -105,6 +107,10 @@ public class PictureProvider : MonoBehaviour
         {
             SetPage(page);
         });
+		if (!isMyFlap && !Settings.MyFlaps.Any())
+		{
+            myFlap.SetActive(false);
+		}
     }
 
     /// <summary>

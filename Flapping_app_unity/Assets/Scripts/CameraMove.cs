@@ -44,7 +44,7 @@ public class CameraMove : MonoBehaviour
         if (ds[4]) transform.position += transform.up * speed * Time.deltaTime;
         if (ds[5]) transform.position -= transform.up * speed * Time.deltaTime;
 
-		if (Input.GetMouseButton(0))
+		if (Input.GetMouseButtonDown(0))
 		{
 			if (!isMouseDown)
 			{

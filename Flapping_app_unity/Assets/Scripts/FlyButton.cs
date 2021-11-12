@@ -40,6 +40,11 @@ public class FlyButton : MonoBehaviour
     /// </summary>
     [SerializeField] Button back;
 
+    /// <summary>
+    /// シーンマネージャ
+    /// </summary>
+    [SerializeField] SceneManagement sceneManagement;
+
     int lastFlapID;
 
     void Start()
@@ -58,6 +63,11 @@ public class FlyButton : MonoBehaviour
 
         io.On("lastFlapID", (SocketIOEvent e) => {
             lastFlapID = int.Parse(e.data);
+        });
+
+        io.On("data_set", e =>
+        {
+            sceneManagement.GoScene("FlyingScene");
         });
 
         switch (Settings.mode)
@@ -94,14 +104,14 @@ public class FlyButton : MonoBehaviour
             string dataStr = JsonUtility.ToJson(set);
             Debug.Log(dataStr);
             io.Emit("emit_from_client", dataStr);
+            var stString = Storage.GetLocalStorage("MyFlap");
+            var myFlaps = JsonConvert.DeserializeObject<List<int>>(string.IsNullOrEmpty(stString) ? "[]" : stString);
+            myFlaps.Add(lastFlapID);
+            Storage.SetLocalStorage("MyFlap", JsonConvert.SerializeObject(myFlaps));
         }
 		else
         {
             io.Emit("addFlapID", JsonConvert.SerializeObject(new Ids() {id = Settings.Id}));
-            var stString = Storage.GetLocalStorage("MyFlap");
-            var myFlaps = JsonConvert.DeserializeObject<List<int>>(string.IsNullOrEmpty(stString) ? "[]" : stString);
-            myFlaps.Add(Settings.Id);
-            Storage.SetLocalStorage("MyFlap", JsonConvert.SerializeObject(myFlaps));
         }
     }
 

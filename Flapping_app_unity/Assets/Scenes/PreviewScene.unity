@@ -765,17 +765,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 759320135}
-        m_MethodName: GoScene
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: FlyingScene
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 759320134}
         m_MethodName: SendData
         m_Mode: 1
@@ -841,6 +830,7 @@ MonoBehaviour:
   io: {fileID: 256257582}
   field: {fileID: 1130023790}
   back: {fileID: 1809750855}
+  sceneManagement: {fileID: 759320135}
 --- !u!114 &759320135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1320,6 +1310,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 8385835637038436037, guid: 2d5bbd2914fd18042ad78dafac473282,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8902105164216912432, guid: 2d5bbd2914fd18042ad78dafac473282,
         type: 3}
       propertyPath: m_RootOrder
