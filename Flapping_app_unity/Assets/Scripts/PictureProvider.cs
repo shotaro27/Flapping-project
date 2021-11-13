@@ -45,8 +45,8 @@ public class PictureProvider : MonoBehaviour
     /// <summary>
     /// サーバーから読み込んだFlapデータのリスト
     /// </summary>
-    public static List<DataNameIDSet> dataNameIDSets = new List<DataNameIDSet>();
-    List<DataNameIDSet> flapDatas;
+    public static Dictionary<int, DataNameSet> dataNameIDSets = new Dictionary<int, DataNameSet>();
+    Dictionary<int, DataNameSet> flapDatas;
 
     [SerializeField] GameObject myFlap;
 
@@ -65,42 +65,50 @@ public class PictureProvider : MonoBehaviour
     /// </summary>
     public static bool isMyFlap = false;
 
+    public static int idOffset = 0;
+
+    public static int Count;
+
+    List<int> myFlaps;
+
+    [SerializeField]
+    int idRange = 90;
+
     void Start()
     {
-        lastPage = (int)Mathf.Ceil((dataNameIDSets.Count - 1) / 6f);
         io.On("connect", e =>
         {
             Debug.Log("SocketIO connected");
-            io.Emit("getFlapData", JsonUtility.ToJson(new Ids { id = dataNameIDSets.Count }));
+            var dcount = dataNameIDSets.Count == 0 ? idOffset : dataNameIDSets.OrderByDescending(d => d.Key).First().Key + 1;
+            io.Emit("getFlapData", JsonUtility.ToJson(new Ids { id = dcount }));
         });
         io.Connect();
         io.On("flapCount", e =>
         {
-            var count = int.Parse(e.data);
-            var dcount = dataNameIDSets.Count;
-            if (FlapController.isGardenDetail && count <= dcount)
+            Count = int.Parse(e.data);
+            idOffset = Math.Max(Count - idRange, 0);
+            var dcount = dataNameIDSets.Count == 0 ? idOffset : dataNameIDSets.OrderByDescending(d => d.Key).First().Key + 1;
+            if (FlapController.isGardenDetail && Count <= dcount)
             {
                 SceneManager.LoadScene("PictureDetailScene");
             }
-            for (int i = dcount; i < count; i++)
-			{
-                dataNameIDSets.Add(new DataNameIDSet() { id = i });
-			}
+            dataNameIDSets = dataNameIDSets.Where(d => d.Key >= idOffset).ToDictionary(d => d.Key, d => d.Value);
         });
         io.On("flapData", e =>
         {
             var d = e.EscapeAndFromJson<DataNameIDSet>();
-            var dat = d.data;
-            dataNameIDSets[d.id] = d;
+            if (d.id < idOffset) return;
             lastPage = (int)Mathf.Ceil(d.id / 6f);
-            if (d.id >= page * 6 - 1 && load.activeSelf)
+            var dat = d.data;
+            dataNameIDSets[d.id] = new DataNameSet(){data = dat, name = d.name};
+            if (d.id - idOffset >= page * 6 - 1 && load.activeSelf)
             {
                 SetPage(page);
             }
-			if (FlapController.isGardenDetail && d.id == dataNameIDSets.Count - 1)
+			if (FlapController.isGardenDetail && d.id == Count - 1)
 			{
                 SceneManager.LoadScene("PictureDetailScene");
-			}
+            }
             pagenation.SetPagenation(page, lastPage, prev, next);
         });
         io.On("sendFlapData", e =>
@@ -119,19 +127,23 @@ public class PictureProvider : MonoBehaviour
     /// <param name="page">ページ</param>
     void SetFlapData(int page)
     {
-        flapDatas = isMyFlap ? Settings.MyFlaps.Select(flID => dataNameIDSets[flID]).ToList() : dataNameIDSets;
+        myFlaps = Settings.MyFlaps.Where(f => f >= idOffset).ToList();
+        flapDatas = isMyFlap ? dataNameIDSets.Where(d => myFlaps.Contains(d.Key)).ToDictionary(d => d.Key, d => d.Value)
+            : dataNameIDSets;
         var flag = false;
+        Debug.Log(flapDatas.Count);
         for (int i = page * 6 - 6; i < page * 6; i++)
         {
-            var e = 0 <= i && i < flapDatas.Count;
-            if (!e || flag)
+			if ((isMyFlap && myFlaps.Count <= i) ||
+                (!isMyFlap && !flapDatas.Select(f => f.Key).Contains(i + idOffset)) || flag)
             {
                 flaps[i % 6].SetActive(false);
                 flag = true;
                 continue;
             }
-            Debug.Log(flapDatas[i].name);
-            var d = flapDatas[i];
+            var id = isMyFlap ? myFlaps[i] : i + idOffset;
+            Debug.Log(flapDatas[id].name);
+            var d = flapDatas[id];
             var dat = d.data;
             var bytes = Convert.FromBase64String(dat);
             var t = new Texture2D(textureReference.width, textureReference.height, TextureFormat.RGBA32, false);
@@ -189,7 +201,7 @@ public class PictureProvider : MonoBehaviour
     /// <param name="id">FlapのID</param>
     public void ShowDetail(int id)
 	{
-        FlapController.id = flapDatas[(page - 1) * 6 + id].id;
+        FlapController.id = isMyFlap ? myFlaps[page * 6 - 6 + id] : page * 6 - 6 + id + idOffset;
         SceneManager.LoadScene("PictureDetailScene");
 	}
 

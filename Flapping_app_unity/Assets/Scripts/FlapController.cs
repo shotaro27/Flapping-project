@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 /// <summary>
 /// Flapの詳細を表示する
@@ -22,7 +23,7 @@ public class FlapController : MonoBehaviour
     /// <summary>
     /// Flapデータ
     /// </summary>
-    private DataNameIDSet d;
+    private DataNameSet d;
 
     /// <summary>
     /// Flapのゲームオブジェクト
@@ -78,8 +79,8 @@ public class FlapController : MonoBehaviour
     void Start()
     {
         sky.DefaultSkyboxState = SkyboxState; //昼夜設定
-        d = PictureProvider.dataNameIDSets.First(f => f.id == id); //Flapデータ取得
-        idText.text = d.id.ToString(); //ID表示
+        d = PictureProvider.dataNameIDSets[id]; //Flapデータ取得
+        idText.text = id.ToString(); //ID表示
         nameText.text = d.name; //名前表示
 
         //画像設定
@@ -98,13 +99,13 @@ public class FlapController : MonoBehaviour
         anim.Play(info.shortNameHash, -1, 0.25f);
 
         //前へ/次へボタンの表示切り替え
-		if ((PictureProvider.isMyFlap && d.id == Settings.MyFlaps[0])
-            || (!PictureProvider.isMyFlap && d.id == 0))
+		if ((PictureProvider.isMyFlap && id == Settings.MyFlaps[0])
+            || (!PictureProvider.isMyFlap && id == PictureProvider.idOffset))
 		{
             prev.SetActive(false);
         }
-        if ((PictureProvider.isMyFlap && d.id == Settings.MyFlaps[Settings.MyFlaps.Count - 1])
-            || (!PictureProvider.isMyFlap && d.id == PictureProvider.dataNameIDSets.Count - 1))
+        if ((PictureProvider.isMyFlap && id == Settings.MyFlaps[Settings.MyFlaps.Count - 1])
+            || (!PictureProvider.isMyFlap && id == PictureProvider.Count - 1))
         {
             next.SetActive(false);
         }

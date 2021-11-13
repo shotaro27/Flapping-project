@@ -7,6 +7,7 @@ using UnitySocketIO;
 using UnitySocketIO.Events;
 using SocketIOJsonObjects;
 using Newtonsoft.Json;
+using System.Linq;
 
 /// <summary>
 /// Flapを管理する
@@ -62,6 +63,9 @@ public class Displayer : MonoBehaviour
     /// </summary>
     readonly List<FlapDataSet> addingFlapDatas = new List<FlapDataSet>();
 
+    [SerializeField]
+    int idRange = 90;
+
     private void Start()
     {
         io.On("connect", (SocketIOEvent e) =>
@@ -78,7 +82,7 @@ public class Displayer : MonoBehaviour
         {
             var f = e.EscapeAndFromJson<FlapDataSet>();
             addingFlapDatas.Add(f);
-            var oldFlap = flaps[0];
+            var oldFlap = flaps.FirstOrDefault(fl => fl.id == f.id - idRange) ?? flaps[0];
             flaps.Remove(oldFlap);
 			var i = new FlapId { id = oldFlap.id };
 			io.Emit("removeFlap", JsonConvert.SerializeObject(i));
