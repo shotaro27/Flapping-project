@@ -44,11 +44,11 @@ public class CameraMove : MonoBehaviour
         if (ds[4]) transform.position += transform.up * speed * Time.deltaTime;
         if (ds[5]) transform.position -= transform.up * speed * Time.deltaTime;
 
-		if (Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonUp(0))
 		{
 			if (!isMouseDown)
 			{
-                Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out var hit, 10.0f) && hit.collider.gameObject.TryGetComponent(out FlapWing fl))
                 {
                     goPictureBook.SetActive(true);

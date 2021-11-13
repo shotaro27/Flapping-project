@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/FlyingScene.unity
+    guid: 495c7e0886474ad40b1163a6dff6d20b
   m_configObjects: {}

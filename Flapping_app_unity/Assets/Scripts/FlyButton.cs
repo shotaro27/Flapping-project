@@ -47,6 +47,8 @@ public class FlyButton : MonoBehaviour
 
     int lastFlapID;
 
+    bool isFlap = false;
+
     void Start()
     {
         // Socket.IO接続
@@ -94,6 +96,7 @@ public class FlyButton : MonoBehaviour
     /// </summary>
     public void SendData()
     {
+        if (isFlap) return; 
 		if (Settings.mode == DrawMode.New)
         {
             byte[] PNGData = Settings.DrawingFlap.EncodeToPNG();
@@ -113,6 +116,7 @@ public class FlyButton : MonoBehaviour
         {
             io.Emit("addFlapID", JsonConvert.SerializeObject(new Ids() {id = Settings.Id}));
         }
+        isFlap = true;
     }
 
     /// <summary>
